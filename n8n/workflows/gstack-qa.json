@@ -1,0 +1,309 @@
+{
+  "name": "gstack++ QA Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gstack-qa",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "qa-webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "gstack-qa-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.gstackBaseUrl }}/command",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "command",
+              "value": "qa"
+            },
+            {
+              "name": "branch",
+              "value": "={{ $json.branch ?? $input.first().json.branch }}"
+            },
+            {
+              "name": "sanitizers",
+              "value": "={{ $json.sanitizers ?? ['address', 'undefined'] }}"
+            },
+            {
+              "name": "runValgrind",
+              "value": "={{ $json.runValgrind ?? false }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 1800
+        }
+      },
+      "id": "gstack-qa-exec",
+      "name": "Execute gstack++ QA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "gstack-auth",
+          "name": "gstack++ API Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.healthScore }}",
+              "operation": "largerEqual",
+              "value2": 90
+            }
+          ]
+        }
+      },
+      "id": "check-health-score",
+      "name": "Check Health Score",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/statuses/{{ $json.sha }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "state",
+              "value": "success"
+            },
+            {
+              "name": "context",
+              "value": "gstack++/qa"
+            },
+            {
+              "name": "description",
+              "value": "Health score: {{ $json.healthScore }}/100 — All tests pass"
+            },
+            {
+              "name": "target_url",
+              "value": "={{ $json.qaReportUrl }}"
+            }
+          ]
+        }
+      },
+      "id": "github-status-success",
+      "name": "Set Success Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/statuses/{{ $json.sha }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "state",
+              "value": "failure"
+            },
+            {
+              "name": "context",
+              "value": "gstack++/qa"
+            },
+            {
+              "name": "description",
+              "value": "Health score: {{ $json.healthScore }}/100 — {{ $json.failureReason }}"
+            },
+            {
+              "name": "target_url",
+              "value": "={{ $json.qaReportUrl }}"
+            }
+          ]
+        }
+      },
+      "id": "github-status-failure",
+      "name": "Set Failure Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 400],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.healthScore >= 90 ? '✅' : '❌' }} gstack++ QA Complete\n\nBranch: {{ $json.branch }}\nHealth Score: {{ $json.healthScore }}/100\nBuild: {{ $json.buildStatus }}\nTests: {{ $json.testResults }}\nSanitizers: {{ $json.sanitizerResults }}\n\nDetails: {{ $json.qaReportUrl }}"
+            }
+          ]
+        }
+      },
+      "id": "qa-slack-notify",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.jiraBaseUrl }}/rest/api/3/issue/{{ $json.jiraIssueId }}/transitions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "jiraApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "transition",
+              "value": {
+                "id": "{{ $json.healthScore >= 90 ? '31' : '21' }}"
+              }
+            },
+            {
+              "name": "update",
+              "value": {
+                "comment": [
+                  {
+                    "add": {
+                      "body": "gstack++ QA: Health score {{ $json.healthScore }}/100. {{ $json.healthScore >= 90 ? 'Ready for merge.' : 'Issues need attention.' }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "jira-transition",
+      "name": "Update Jira Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 300],
+      "credentials": {
+        "jiraApi": {
+          "id": "jira-creds",
+          "name": "Jira API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute gstack++ QA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute gstack++ QA": {
+      "main": [
+        [
+          {
+            "node": "Check Health Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Health Score": {
+      "main": [
+        [
+          {
+            "node": "Set Success Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Failure Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Success Status": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Failure Status": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Slack": {
+      "main": [
+        [
+          {
+            "node": "Update Jira Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["gstack++", "qa", "ci-cd", "testing"],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-18T00:00:00.000Z",
+  "versionId": "1"
+}

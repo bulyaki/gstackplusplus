@@ -1,0 +1,16 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- gstack++ logo adapted for n8n node -->
+  <rect width="256" height="256" rx="48" fill="#FF6D5A"/>
+  
+  <!-- C++ symbol -->
+  <path d="M80 80L120 128L80 176" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M140 80L180 128L140 176" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Plus signs -->
+  <path d="M100 60V100M80 80H120" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <path d="M160 60V100M140 80H180" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Automation arrow -->
+  <path d="M176 140L200 168L176 196" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M140 168H200" stroke="white" stroke-width="12" stroke-linecap="round"/>
+</svg>

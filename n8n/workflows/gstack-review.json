@@ -1,0 +1,219 @@
+{
+  "name": "gstack++ Code Review",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gstack-review",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "gstack-review-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.gstackBaseUrl }}/command",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "command",
+              "value": "review"
+            },
+            {
+              "name": "branch",
+              "value": "={{ $json.branch ?? $input.first().json.branch }}"
+            },
+            {
+              "name": "base",
+              "value": "={{ $json.base ?? 'main' }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 1800
+        }
+      },
+      "id": "gstack-review-exec",
+      "name": "Execute gstack++ Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "gstack-auth",
+          "name": "gstack++ API Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "check-status",
+      "name": "Check Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/issues/{{ $json.pullRequestId }}/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ $json.reviewSummary }}"
+            }
+          ]
+        }
+      },
+      "id": "github-comment",
+      "name": "Post GitHub Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "🔍 gstack++ Review Complete\n\nBranch: {{ $json.branch }}\nIssues Found: {{ $json.issueCount }}\nAuto-fixed: {{ $json.autoFixedCount }}\nNeeds Review: {{ $json.askCount }}\n\nPR: {{ $json.prUrl }}"
+            }
+          ]
+        }
+      },
+      "id": "slack-notify",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/issues/{{ $json.pullRequestId }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "labels",
+              "value": ["needs-review"]
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": false
+        }
+      },
+      "id": "add-label",
+      "name": "Add Review Label",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 400],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute gstack++ Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute gstack++ Review": {
+      "main": [
+        [
+          {
+            "node": "Check Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status": {
+      "main": [
+        [
+          {
+            "node": "Post GitHub Comment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Review Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post GitHub Comment": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["gstack++", "code-review", "ci-cd"],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-18T00:00:00.000Z",
+  "versionId": "1"
+}

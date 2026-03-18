@@ -119,8 +119,31 @@ The clone-and-setup step is the same regardless of which platform you use. What 
 ### Step 1 — Clone and build (same for all platforms)
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/your-fork/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/your-fork/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/your-fork/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/your-fork/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/your-fork/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/your-fork/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
 ### Step 2 — Configure for your platform

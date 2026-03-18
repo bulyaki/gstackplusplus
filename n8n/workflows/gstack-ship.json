@@ -1,0 +1,282 @@
+{
+  "name": "gstack++ Ship Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gstack-ship",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "ship-webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "gstack-ship-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.gstackBaseUrl }}/command",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "command",
+              "value": "ship"
+            },
+            {
+              "name": "branch",
+              "value": "={{ $json.branch ?? $input.first().json.branch }}"
+            },
+            {
+              "name": "base",
+              "value": "={{ $json.base ?? 'main' }}"
+            },
+            {
+              "name": "prTitle",
+              "value": "={{ $json.prTitle ?? '' }}"
+            },
+            {
+              "name": "prBody",
+              "value": "={{ $json.prBody ?? '' }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 1800
+        }
+      },
+      "id": "gstack-ship-exec",
+      "name": "Execute gstack++ Ship",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "gstack-auth",
+          "name": "gstack++ API Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "check-ship-status",
+      "name": "Check Ship Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/pulls",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.prTitle }}"
+            },
+            {
+              "name": "body",
+              "value": "={{ $json.prBody }}"
+            },
+            {
+              "name": "head",
+              "value": "={{ $json.branch }}"
+            },
+            {
+              "name": "base",
+              "value": "={{ $json.base }}"
+            }
+          ]
+        }
+      },
+      "id": "create-pr",
+      "name": "Create Pull Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/issues/{{ $json.pullRequestId }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "labels",
+              "value": ["ready-to-merge", "tests-passing"]
+            }
+          ]
+        }
+      },
+      "id": "add-ship-labels",
+      "name": "Add Ship Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "🚀 gstack++ Ship Complete!\n\nBranch: {{ $json.branch }}\nPR: {{ $json.prUrl }}\nTests: {{ $json.testResults }}\nCoverage: {{ $json.coverage }}\n\nReady for merge!"
+            }
+          ]
+        }
+      },
+      "id": "ship-slack-notify",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.githubApiUrl }}/repos/{{ $json.repository }}/statuses/{{ $json.sha }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "githubApi",
+        "sendBody": {
+          "parameters": [
+            {
+              "name": "state",
+              "value": "failure"
+            },
+            {
+              "name": "context",
+              "value": "gstack++/ship"
+            },
+            {
+              "name": "description",
+              "value": "Ship failed: {{ $json.failureReason }}"
+            }
+          ]
+        }
+      },
+      "id": "set-ship-failure",
+      "name": "Set Failure Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 400],
+      "credentials": {
+        "githubApi": {
+          "id": "github-creds",
+          "name": "GitHub API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Execute gstack++ Ship",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute gstack++ Ship": {
+      "main": [
+        [
+          {
+            "node": "Check Ship Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Ship Status": {
+      "main": [
+        [
+          {
+            "node": "Create Pull Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Failure Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Pull Request": {
+      "main": [
+        [
+          {
+            "node": "Add Ship Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Ship Labels": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["gstack++", "ship", "ci-cd", "pull-request"],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-18T00:00:00.000Z",
+  "versionId": "1"
+}

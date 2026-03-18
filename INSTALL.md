@@ -51,15 +51,39 @@ bun --version   # should print 1.x.x or higher
 ### 5. Clone and build gstack++
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/bulyaki/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
-`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. The `~/.claude/skills/` path is not Claude-exclusive — it is the shared location where Claude Code, Cursor's Claude agent, and compatible tools look for skills. Codex, Qwen, Antigravity, and Copilot are registered per-project in the next step. First run takes 2–3 minutes; subsequent runs are instant.
+`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. First run takes 2–3 minutes; subsequent runs are instant.
 
 ### 6. Verify
 
 ```bash
+# Replace `.claude` below with your tool's directory (e.g., `.qwen`, `.cursor`) if different
 ~/.claude/skills/gstackplusplus/browse/dist/browse --version
 ```
 
@@ -110,6 +134,7 @@ After running the meta-skill, every gstack++ skill (`/review`, `/ship`, `/qa`, e
 ### 8. Add to your repo so teammates get it (optional)
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cp -Rf ~/.claude/skills/gstackplusplus .claude/skills/gstackplusplus
 rm -rf .claude/skills/gstackplusplus/.git
 cd .claude/skills/gstackplusplus && ./setup
@@ -149,11 +174,34 @@ bun --version      # should print 1.x.x or higher
 ### 3. Clone and build gstack++
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/bulyaki/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
-`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. The `~/.claude/skills/` path is not Claude-exclusive — it is the shared location where Claude Code, Cursor's Claude agent, and compatible tools look for skills. Codex, Qwen, Antigravity, and Copilot are registered per-project in the next step. First run takes 2–3 minutes; subsequent runs are instant.
+`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. First run takes 2–3 minutes; subsequent runs are instant.
 
 If Playwright fails to launch Chromium, install the missing system libraries:
 
@@ -168,6 +216,7 @@ Then re-run `./setup`.
 ### 4. Verify
 
 ```bash
+# Replace `.claude` below with your tool's directory (e.g., `.qwen`, `.cursor`) if different
 ~/.claude/skills/gstackplusplus/browse/dist/browse --version
 ```
 
@@ -218,6 +267,7 @@ After running the meta-skill, every gstack++ skill (`/review`, `/ship`, `/qa`, e
 ### 6. Add to your repo so teammates get it (optional)
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cp -Rf ~/.claude/skills/gstackplusplus .claude/skills/gstackplusplus
 rm -rf .claude/skills/gstackplusplus/.git
 cd .claude/skills/gstackplusplus && ./setup
@@ -257,15 +307,39 @@ bun --version      # should print 1.x.x or higher
 ### 3. Clone and build gstack++
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/bulyaki/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
-`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. The `~/.claude/skills/` path is not Claude-exclusive — it is the shared location where Claude Code, Cursor's Claude agent, and compatible tools look for skills. Codex, Qwen, Antigravity, and Copilot are registered per-project in the next step. First run takes 2–3 minutes; subsequent runs are instant.
+`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. First run takes 2–3 minutes; subsequent runs are instant.
 
 ### 4. Verify
 
 ```bash
+# Replace `.claude` below with your tool's directory (e.g., `.qwen`, `.cursor`) if different
 ~/.claude/skills/gstackplusplus/browse/dist/browse --version
 ```
 
@@ -316,6 +390,7 @@ After running the meta-skill, every gstack++ skill (`/review`, `/ship`, `/qa`, e
 ### 6. Add to your repo so teammates get it (optional)
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cp -Rf ~/.claude/skills/gstackplusplus .claude/skills/gstackplusplus
 rm -rf .claude/skills/gstackplusplus/.git
 cd .claude/skills/gstackplusplus && ./setup
@@ -348,15 +423,39 @@ bun --version      # should print 1.x.x or higher
 ### 3. Clone and build gstack++
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/bulyaki/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
-`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. The `~/.claude/skills/` path is not Claude-exclusive — it is the shared location where Claude Code, Cursor's Claude agent, and compatible tools look for skills. Codex, Qwen, Antigravity, and Copilot are registered per-project in the next step. First run takes 2–3 minutes; subsequent runs are instant.
+`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. First run takes 2–3 minutes; subsequent runs are instant.
 
 ### 4. Verify
 
 ```bash
+# Replace `.claude` below with your tool's directory (e.g., `.qwen`, `.cursor`) if different
 ~/.claude/skills/gstackplusplus/browse/dist/browse --version
 ```
 
@@ -407,6 +506,7 @@ After running the meta-skill, every gstack++ skill (`/review`, `/ship`, `/qa`, e
 ### 6. Add to your repo so teammates get it (optional)
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cp -Rf ~/.claude/skills/gstackplusplus .claude/skills/gstackplusplus
 rm -rf .claude/skills/gstackplusplus/.git
 cd .claude/skills/gstackplusplus && ./setup
@@ -466,17 +566,41 @@ sudo apt install -y libgbm1 libasound2 libatk1.0-0 libatk-bridge2.0-0 \
 ### 6. Clone and build gstack++
 
 ```bash
+# Clone the repository into the skills directory for your specific AI tool:
+
+# Claude Code
 git clone https://github.com/bulyaki/gstackplusplus.git ~/.claude/skills/gstackplusplus
 cd ~/.claude/skills/gstackplusplus && ./setup
+
+# Qwen
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.qwen/skills/gstackplusplus
+cd ~/.qwen/skills/gstackplusplus && ./setup
+
+# Copilot
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.copilot/skills/gstackplusplus
+cd ~/.copilot/skills/gstackplusplus && ./setup
+
+# Codex
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.codex/skills/gstackplusplus
+cd ~/.codex/skills/gstackplusplus && ./setup
+
+# Antigravity
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.antigravity/skills/gstackplusplus
+cd ~/.antigravity/skills/gstackplusplus && ./setup
+
+# Cursor
+git clone https://github.com/bulyaki/gstackplusplus.git ~/.cursor/skills/gstackplusplus
+cd ~/.cursor/skills/gstackplusplus && ./setup
 ```
 
-`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. The `~/.claude/skills/` path is not Claude-exclusive — it is the shared location where Claude Code, Cursor's Claude agent, and compatible tools look for skills. Codex, Qwen, Antigravity, and Copilot are registered per-project in the next step. First run takes 2–3 minutes; subsequent runs are instant.
+`./setup` compiles the `browse` binary, downloads Playwright's Chromium (~300 MB on first run), and builds the shared infrastructure used by all six supported platforms. First run takes 2–3 minutes; subsequent runs are instant.
 
 > **Keep your projects inside the WSL filesystem** (`~/projects/`, not `/mnt/c/...`). The WSL–Windows bridge is significantly slower and can cause Bun and Playwright to time out.
 
 ### 7. Verify
 
 ```bash
+# Replace `.claude` below with your tool's directory (e.g., `.qwen`, `.cursor`) if different
 ~/.claude/skills/gstackplusplus/browse/dist/browse --version
 ```
 
@@ -527,6 +651,7 @@ After running the meta-skill, every gstack++ skill (`/review`, `/ship`, `/qa`, e
 ### 9. Add to your repo so teammates get it (optional)
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cp -Rf ~/.claude/skills/gstackplusplus .claude/skills/gstackplusplus
 rm -rf .claude/skills/gstackplusplus/.git
 cd .claude/skills/gstackplusplus && ./setup
@@ -554,6 +679,7 @@ The installer adds a line to `~/.bashrc` (or `~/.zshrc`). Either restart your sh
 Run the build step manually to see the full error:
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cd ~/.claude/skills/gstackplusplus
 bun install
 bun run build
@@ -574,6 +700,7 @@ Or set `CMAKE_CXX_CLANG_TIDY` in your `CMakePresets.json` to point at the versio
 **Stale install after pulling updates**
 
 ```bash
+# Replace `.claude` below if you installed it for a different AI tool
 cd ~/.claude/skills/gstackplusplus
 git pull
 ./setup
