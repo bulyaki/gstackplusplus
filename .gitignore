@@ -11,3 +11,7 @@ bun.lock
 .env.local
 .env.*
 !.env.example
+
+# Marketing materials (do not commit)
+PROMOTION.md
+RECOMMENDATION-POSTS.md
