@@ -89,7 +89,7 @@ Memory analysis: valgrind memcheck.
 | `/qa-only` | Same as /qa but report only — no code changes |
 | `/design-review` | API audit + fix loop; minimal diffs, re-verified |
 | `/retro` | Weekly stats: commits, test health, per-person breakdown |
-| `/document-release` | Update README/ARCHITECTURE/CLAUDE.md after shipping |
+| `/document-release` | Update README/ARCHITECTURE/COPILOT.md after shipping |
 
 ## Coding conventions
 
@@ -110,7 +110,9 @@ cmake -S . -B build-asan -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -g"
 ```
 ```
 
-## Step 4: Write project CLAUDE.md
+## Step 4: Write COPILOT.md
+
+Write the gstack++ entry to `COPILOT.md` (create the file if it does not exist — this supplements `.github/copilot-instructions.md` with project-specific gstack++ context):
 
 ```markdown
 ## gstack++ (Copilot mode)
@@ -209,9 +211,9 @@ jobs:
 
 ### 5. copilot-instructions.md stays current
 
-After `/document-release` or any skill that updates `CLAUDE.md`, also update
+After `/document-release` or any skill that updates `COPILOT.md`, also update
 `.github/copilot-instructions.md`. These two files serve the same purpose for
-different platforms and must stay in sync. The `/document-release` skill should
+different contexts and must stay in sync. The `/document-release` skill should
 treat them as a pair.
 
 ### 6. PR description for Copilot review
@@ -255,7 +257,7 @@ the user sees the question in the Copilot Chat panel and can respond directly.
 | `/qa-only` | ✅ Full | Copilot Chat | `@workspace`-compatible finding format |
 | `/design-review` | ✅ Full | Copilot Edits | Checkpoint per API change |
 | `/retro` | ✅ Full | Copilot Chat | Stats summary in chat panel |
-| `/document-release` | ✅ Full | Copilot Edits | Updates both CLAUDE.md and copilot-instructions.md |
+| `/document-release` | ✅ Full | Copilot Edits | Updates both COPILOT.md and copilot-instructions.md |
 
 ---
 

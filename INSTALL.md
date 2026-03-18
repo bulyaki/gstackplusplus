@@ -97,7 +97,7 @@ Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting),
 ```
 /cursor
 ```
-Writes `.cursorrules` (auto-injected by Cursor into every session) and `CLAUDE.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
+Writes `.cursorrules` (auto-injected by Cursor into every session) and `CURSOR.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
 
 **[GitHub Copilot in VS Code](https://github.com/features/copilot)** — requires VS Code with the GitHub Copilot extension enabled.
 ```
@@ -205,7 +205,7 @@ Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting),
 ```
 /cursor
 ```
-Writes `.cursorrules` (auto-injected by Cursor into every session) and `CLAUDE.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
+Writes `.cursorrules` (auto-injected by Cursor into every session) and `CURSOR.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
 
 **[GitHub Copilot in VS Code](https://github.com/features/copilot)** — requires VS Code with the GitHub Copilot extension enabled.
 ```
@@ -303,7 +303,7 @@ Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting),
 ```
 /cursor
 ```
-Writes `.cursorrules` (auto-injected by Cursor into every session) and `CLAUDE.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
+Writes `.cursorrules` (auto-injected by Cursor into every session) and `CURSOR.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
 
 **[GitHub Copilot in VS Code](https://github.com/features/copilot)** — requires VS Code with the GitHub Copilot extension enabled.
 ```
@@ -394,7 +394,7 @@ Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting),
 ```
 /cursor
 ```
-Writes `.cursorrules` (auto-injected by Cursor into every session) and `CLAUDE.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
+Writes `.cursorrules` (auto-injected by Cursor into every session) and `CURSOR.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
 
 **[GitHub Copilot in VS Code](https://github.com/features/copilot)** — requires VS Code with the GitHub Copilot extension enabled.
 ```
@@ -514,7 +514,7 @@ Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting),
 ```
 /cursor
 ```
-Writes `.cursorrules` (auto-injected by Cursor into every session) and `CLAUDE.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
+Writes `.cursorrules` (auto-injected by Cursor into every session) and `CURSOR.md`. Scopes each edit to one logical checkpoint, formats findings as `@file:line` clickable links, and uses Composer (Cmd+I) for multi-file changes vs inline chat (Cmd+K) for single-file edits.
 
 **[GitHub Copilot in VS Code](https://github.com/features/copilot)** — requires VS Code with the GitHub Copilot extension enabled.
 ```

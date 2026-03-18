@@ -93,10 +93,9 @@ Cursor's model selector for deeper analysis. For fast iteration (/qa, /review),
 claude-3-5-sonnet or GPT-4o work well.
 ```
 
-## Step 4: Write project CLAUDE.md (for non-Cursor sessions)
+## Step 4: Write CURSOR.md
 
-Also write the standard gstack++ entry to `CLAUDE.md` so the project works across
-all platforms:
+Write the gstack++ entry to `CURSOR.md` (create the file if it does not exist — Cursor reads `CURSOR.md` for project-level instructions alongside `.cursorrules`):
 
 ```markdown
 ## gstack++ (Cursor mode)
@@ -178,9 +177,9 @@ Fix: wrap reads/writes in `std::lock_guard<std::mutex> lock(dispatch_mutex_);`
 
 ### 5. .cursorrules stays current
 
-After `/document-release` or any skill that updates `CLAUDE.md`, also update
+After `/document-release` or any skill that updates `CURSOR.md`, also update
 `.cursorrules` to keep it in sync. The `.cursorrules` file is Cursor's primary
-context source and drifts faster than `CLAUDE.md` if not maintained together.
+context source and drifts faster than `CURSOR.md` if not maintained together.
 
 ### 6. AskUserQuestion stays on
 
