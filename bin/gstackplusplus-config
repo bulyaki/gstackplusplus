@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# gstackplusplus-config — read/write ~/.gstackplusplus/config.yaml
+#
+# Usage:
+#   gstackplusplus-config get <key>          — read a config value
+#   gstackplusplus-config set <key> <value>  — write a config value
+#   gstackplusplus-config list               — show all config
+#
+# Env overrides (for testing):
+#   GSTACKPLUSPLUS_STATE_DIR  — override ~/.gstackplusplus state directory
+set -euo pipefail
+
+STATE_DIR="${GSTACKPLUSPLUS_STATE_DIR:-$HOME/.gstackplusplus}"
+CONFIG_FILE="$STATE_DIR/config.yaml"
+
+case "${1:-}" in
+  get)
+    KEY="${2:?Usage: gstackplusplus-config get <key>}"
+    grep -E "^${KEY}:" "$CONFIG_FILE" 2>/dev/null | tail -1 | awk '{print $2}' | tr -d '[:space:]' || true
+    ;;
+  set)
+    KEY="${2:?Usage: gstackplusplus-config set <key> <value>}"
+    VALUE="${3:?Usage: gstackplusplus-config set <key> <value>}"
+    mkdir -p "$STATE_DIR"
+    if grep -qE "^${KEY}:" "$CONFIG_FILE" 2>/dev/null; then
+      sed -i '' "s/^${KEY}:.*/${KEY}: ${VALUE}/" "$CONFIG_FILE"
+    else
+      echo "${KEY}: ${VALUE}" >> "$CONFIG_FILE"
+    fi
+    ;;
+  list)
+    cat "$CONFIG_FILE" 2>/dev/null || true
+    ;;
+  *)
+    echo "Usage: gstackplusplus-config {get|set|list} [key] [value]"
+    exit 1
+    ;;
+esac

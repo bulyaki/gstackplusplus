@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remove local dev skill symlinks. Restores global gstack as the active install.
+# Remove local dev skill symlinks. Restores global gstack++ as the active install.
 set -e
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,17 +14,17 @@ fi
 removed=()
 for link in "$SKILLS_DIR"/*/; do
   name="$(basename "$link")"
-  [ "$name" = "gstack" ] && continue
+  [ "$name" = "gstackplusplus" ] && continue
   if [ -L "${link%/}" ]; then
     rm "${link%/}"
     removed+=("$name")
   fi
 done
 
-# Remove the gstack symlink
-if [ -L "$SKILLS_DIR/gstack" ]; then
-  rm "$SKILLS_DIR/gstack"
-  removed+=("gstack")
+# Remove the root skill symlink
+if [ -L "$SKILLS_DIR/gstackplusplus" ]; then
+  rm "$SKILLS_DIR/gstackplusplus"
+  removed+=("gstackplusplus")
 fi
 
 # Clean up empty dirs
@@ -36,4 +36,4 @@ if [ ${#removed[@]} -gt 0 ]; then
 else
   echo "No symlinks found."
 fi
-echo "Dev mode deactivated. Global gstack (~/.claude/skills/gstack) is now active."
+echo "Dev mode deactivated. Global gstack++ (~/.claude/skills/gstackplusplus) is now active."

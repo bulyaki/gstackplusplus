@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Aggregate summary of all eval runs from ~/.gstack-dev/evals/
+ * Aggregate summary of all eval runs from ~/.gstackplusplus-dev/evals/
  *
  * Usage: bun run eval:summary
  */
@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as os from 'os';
 import type { EvalResult } from '../test/helpers/eval-store';
 
-const EVAL_DIR = path.join(os.homedir(), '.gstack-dev', 'evals');
+const EVAL_DIR = path.join(os.homedir(), '.gstackplusplus-dev', 'evals');
 
 let files: string[];
 try {

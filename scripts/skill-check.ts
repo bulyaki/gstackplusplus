@@ -15,7 +15,7 @@ import { execSync } from 'child_process';
 
 const ROOT = path.resolve(import.meta.dir, '..');
 
-// Find all SKILL.md files
+// Find all generated SKILL.md files
 const SKILL_FILES = [
   'SKILL.md',
   'browse/SKILL.md',
@@ -29,8 +29,15 @@ const SKILL_FILES = [
   'setup-browser-cookies/SKILL.md',
   'plan-design-review/SKILL.md',
   'design-review/SKILL.md',
-  'gstack-upgrade/SKILL.md',
+  'gstackplusplus-upgrade/SKILL.md',
   'document-release/SKILL.md',
+  'design-consultation/SKILL.md',
+  'claude/SKILL.md',
+  'codex/SKILL.md',
+  'qwen/SKILL.md',
+  'antigravity/SKILL.md',
+  'cursor/SKILL.md',
+  'copilot/SKILL.md',
 ].filter(f => fs.existsSync(path.join(ROOT, f)));
 
 let hasErrors = false;
@@ -68,10 +75,9 @@ for (const file of SKILL_FILES) {
 // ─── Templates ──────────────────────────────────────────────
 
 console.log('\n  Templates:');
-const TEMPLATES = [
-  { tmpl: 'SKILL.md.tmpl', output: 'SKILL.md' },
-  { tmpl: 'browse/SKILL.md.tmpl', output: 'browse/SKILL.md' },
-];
+const TEMPLATES = SKILL_FILES
+  .map(output => ({ tmpl: output + '.tmpl', output }))
+  .filter(({ tmpl }) => fs.existsSync(path.join(ROOT, tmpl)));
 
 for (const { tmpl, output } of TEMPLATES) {
   const tmplPath = path.join(ROOT, tmpl);

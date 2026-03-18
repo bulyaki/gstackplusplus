@@ -2,7 +2,8 @@
 name: ship
 version: 1.0.0
 description: |
-  Ship workflow: detect + merge base branch, run tests, review diff, bump VERSION, update CHANGELOG, commit, push, create PR.
+  Ship workflow for C++ projects: detect + merge base branch, build, run tests, run static analysis,
+  review diff, bump VERSION, update CHANGELOG, commit, push, create PR.
 allowed-tools:
   - Bash
   - Read
@@ -19,29 +20,29 @@ allowed-tools:
 ## Preamble (run first)
 
 ```bash
-_UPD=$(~/.claude/skills/gstack/bin/gstack-update-check 2>/dev/null || .claude/skills/gstack/bin/gstack-update-check 2>/dev/null || true)
+_UPD=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || .claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
-mkdir -p ~/.gstack/sessions
-touch ~/.gstack/sessions/"$PPID"
-_SESSIONS=$(find ~/.gstack/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
-find ~/.gstack/sessions -mmin +120 -type f -delete 2>/dev/null || true
-_CONTRIB=$(~/.claude/skills/gstack/bin/gstack-config get gstack_contributor 2>/dev/null || true)
+mkdir -p ~/.gstackplusplus/sessions
+touch ~/.gstackplusplus/sessions/"$PPID"
+_SESSIONS=$(find ~/.gstackplusplus/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
+find ~/.gstackplusplus/sessions -mmin +120 -type f -delete 2>/dev/null || true
+_CONTRIB=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-config get gstackplusplus_contributor 2>/dev/null || true)
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo "BRANCH: $_BRANCH"
-_LAKE_SEEN=$([ -f ~/.gstack/.completeness-intro-seen ] && echo "yes" || echo "no")
+_LAKE_SEEN=$([ -f ~/.gstackplusplus/.completeness-intro-seen ] && echo "yes" || echo "no")
 echo "LAKE_INTRO: $_LAKE_SEEN"
 ```
 
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
+If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstackplusplus/gstackplusplus-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack++ v{to} (just updated!)" and continue.
 
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
-Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
+Tell the user: "gstack++ follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
 Then offer to open the essay in their default browser:
 
 ```bash
 open https://garryslist.org/posts/boil-the-ocean
-touch ~/.gstack/.completeness-intro-seen
+touch ~/.gstackplusplus/.completeness-intro-seen
 ```
 
 Only run `open` if the user says yes. Always run `touch` to mark as seen. This only happens once.
@@ -62,11 +63,11 @@ Per-skill instructions may add additional formatting rules on top of this baseli
 
 AI-assisted coding makes the marginal cost of completeness near-zero. When you present options:
 
-- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack. "Good enough" is the wrong instinct when "complete" costs minutes more.
+- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack++. "Good enough" is the wrong instinct when "complete" costs minutes more.
 - **Lake vs. ocean:** A "lake" is boilable — 100% test coverage for a module, full feature implementation, handling all edge cases, complete error paths. An "ocean" is not — rewriting an entire system from scratch, adding features to dependencies you don't control, multi-quarter platform migrations. Recommend boiling lakes. Flag oceans as out of scope.
-- **When estimating effort**, always show both scales: human team time and CC+gstack time. The compression ratio varies by task type — use this reference:
+- **When estimating effort**, always show both scales: human team time and CC+gstack++ time. The compression ratio varies by task type — use this reference:
 
-| Task type | Human team | CC+gstack | Compression |
+| Task type | Human team | CC+gstack++ | Compression |
 |-----------|-----------|-----------|-------------|
 | Boilerplate / scaffolding | 2 days | 15 min | ~100x |
 | Test writing | 1 day | 15 min | ~50x |
@@ -85,20 +86,20 @@ AI-assisted coding makes the marginal cost of completeness near-zero. When you p
 
 ## Contributor Mode
 
-If `_CONTRIB` is `true`: you are in **contributor mode**. You're a gstack user who also helps make it better.
+If `_CONTRIB` is `true`: you are in **contributor mode**. You're a gstack++ user who also helps make it better.
 
-**At the end of each major workflow step** (not after every single command), reflect on the gstack tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack code or skill markdown — file a field report. Maybe our contributor will help make us better!
+**At the end of each major workflow step** (not after every single command), reflect on the gstack++ tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack++ code or skill markdown — file a field report. Maybe our contributor will help make us better!
 
-**Calibration — this is the bar:** For example, `$B js "await fetch(...)"` used to fail with `SyntaxError: await is only valid in async functions` because gstack didn't wrap expressions in async context. Small, but the input was reasonable and gstack should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
+**Calibration — this is the bar:** For example, `$B js "await fetch(...)"` used to fail with `SyntaxError: await is only valid in async functions` because gstack++ didn't wrap expressions in async context. Small, but the input was reasonable and gstack++ should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
 
 **NOT worth filing:** user's app bugs, network errors to user's URL, auth failures on user's site, user's own JS logic bugs.
 
-**To file:** write `~/.gstack/contributor-logs/{slug}.md` with **all sections below** (do not truncate — include every section through the Date/Version footer):
+**To file:** write `~/.gstackplusplus/contributor-logs/{slug}.md` with **all sections below** (do not truncate — include every section through the Date/Version footer):
 
 ```
 # {Title}
 
-Hey gstack team — ran into this while using /{skill-name}:
+Hey gstack++ team — ran into this while using /{skill-name}:
 
 **What I was trying to do:** {what the user/agent was attempting}
 **What happened instead:** {what actually happened}
@@ -113,12 +114,12 @@ Hey gstack team — ran into this while using /{skill-name}:
 ```
 
 ## What would make this a 10
-{one sentence: what gstack should have done differently}
+{one sentence: what gstack++ should have done differently}
 
-**Date:** {YYYY-MM-DD} | **Version:** {gstack version} | **Skill:** /{skill}
+**Date:** {YYYY-MM-DD} | **Version:** {gstack++ version} | **Skill:** /{skill}
 ```
 
-Slug: lowercase, hyphens, max 60 chars (e.g. `browse-js-no-await`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack field report: {title}"
+Slug: lowercase, hyphens, max 60 chars (e.g. `browse-js-no-await`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack++ field report: {title}"
 
 ## Step 0: Detect base branch
 
@@ -180,10 +181,10 @@ You are running the `/ship` workflow. This is a **non-interactive, fully automat
 After completing the review, read the review log and config to display the dashboard.
 
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-cat ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_REVIEWS"
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+cat ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_REVIEWS"
 echo "---CONFIG---"
-~/.claude/skills/gstack/bin/gstack-config get skip_eng_review 2>/dev/null || echo "false"
+~/.claude/skills/gstackplusplus/bin/gstackplusplus-config get skip_eng_review 2>/dev/null || echo "false"
 ```
 
 Parse the output. Find the most recent entry for each skill (plan-ceo-review, plan-eng-review, plan-design-review, design-review-lite). Ignore entries with timestamps older than 7 days. For Design Review, show whichever is more recent between `plan-design-review` (full visual audit) and `design-review-lite` (code-level check). Append "(FULL)" or "(LITE)" to the status to distinguish. Display:
@@ -203,7 +204,7 @@ Parse the output. Find the most recent entry for each skill (plan-ceo-review, pl
 ```
 
 **Review tiers:**
-- **Eng Review (required by default):** The only review that gates shipping. Covers architecture, code quality, tests, performance. Can be disabled globally with \`gstack-config set skip_eng_review true\` (the "don't bother me" setting).
+- **Eng Review (required by default):** The only review that gates shipping. Covers architecture, code quality, tests, performance. Can be disabled globally with \`gstackplusplus-config set skip_eng_review true\` (the "don't bother me" setting).
 - **CEO Review (optional):** Use your judgment. Recommend it for big product/business changes, new user-facing features, or scope decisions. Skip for bug fixes, refactors, infra, and cleanup.
 - **Design Review (optional):** Use your judgment. Recommend it for UI/UX changes. Skip for backend-only, infra, or prompt-only changes.
 
@@ -217,8 +218,8 @@ If the Eng Review is NOT "CLEAR":
 
 1. **Check for a prior override on this branch:**
    ```bash
-   eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-   grep '"skill":"ship-review-override"' ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_OVERRIDE"
+   eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+   grep '"skill":"ship-review-override"' ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_OVERRIDE"
    ```
    If an override exists, display the dashboard and note "Review gate previously accepted — continuing." Do NOT ask again.
 
@@ -227,12 +228,12 @@ If the Eng Review is NOT "CLEAR":
    - RECOMMENDATION: Choose C if the change is obviously trivial (< 20 lines, typo fix, config-only); Choose B for larger changes
    - Options: A) Ship anyway  B) Abort — run /plan-eng-review first  C) Change is too small to need eng review
    - If CEO Review is missing, mention as informational ("CEO Review not run — recommended for product changes") but do NOT block
-   - For Design Review: run `eval $(~/.claude/skills/gstack/bin/gstack-diff-scope <base> 2>/dev/null)`. If `SCOPE_FRONTEND=true` and no design review (plan-design-review or design-review-lite) exists in the dashboard, mention: "Design Review not run — this PR changes frontend code. The lite design check will run automatically in Step 3.5, but consider running /design-review for a full visual audit post-implementation." Still never block.
+   - For Design Review: run `eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-diff-scope <base> 2>/dev/null)`. If `SCOPE_FRONTEND=true` and no design review (plan-design-review or design-review-lite) exists in the dashboard, mention: "Design Review not run — this PR changes frontend code. The lite design check will run automatically in Step 3.5, but consider running /design-review for a full visual audit post-implementation." Still never block.
 
 3. **If the user chooses A or C,** persist the decision so future `/ship` runs on this branch skip the gate:
    ```bash
-   eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-   echo '{"skill":"ship-review-override","timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","decision":"USER_CHOICE"}' >> ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl
+   eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+   echo '{"skill":"ship-review-override","timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","decision":"USER_CHOICE"}' >> ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl
    ```
    Substitute USER_CHOICE with "ship_anyway" or "not_relevant".
 
@@ -256,240 +257,269 @@ git fetch origin <base> && git merge origin/<base> --no-edit
 
 ## Test Framework Bootstrap
 
-**Detect existing test framework and project runtime:**
+**Detect existing test framework and C++ project setup:**
 
 ```bash
-# Detect project runtime
-[ -f Gemfile ] && echo "RUNTIME:ruby"
-[ -f package.json ] && echo "RUNTIME:node"
-[ -f requirements.txt ] || [ -f pyproject.toml ] && echo "RUNTIME:python"
-[ -f go.mod ] && echo "RUNTIME:go"
-[ -f Cargo.toml ] && echo "RUNTIME:rust"
-[ -f composer.json ] && echo "RUNTIME:php"
-[ -f mix.exs ] && echo "RUNTIME:elixir"
-# Detect sub-frameworks
-[ -f Gemfile ] && grep -q "rails" Gemfile 2>/dev/null && echo "FRAMEWORK:rails"
-[ -f package.json ] && grep -q '"next"' package.json 2>/dev/null && echo "FRAMEWORK:nextjs"
-# Check for existing test infrastructure
-ls jest.config.* vitest.config.* playwright.config.* .rspec pytest.ini pyproject.toml phpunit.xml 2>/dev/null
-ls -d test/ tests/ spec/ __tests__/ cypress/ e2e/ 2>/dev/null
+# Detect build system
+[ -f CMakeLists.txt ] && echo "BUILD:cmake" || true
+[ -f Makefile ] && echo "BUILD:make" || true
+[ -f meson.build ] && echo "BUILD:meson" || true
+# Detect test framework
+grep -r "gtest|googletest|GTest" CMakeLists.txt 2>/dev/null && echo "TEST_FW:gtest" || true
+grep -r "Catch2|CATCH_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:catch2" || true
+grep -r "doctest|DOCTEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:doctest" || true
+grep -r "boost.*test|BOOST_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:boost_test" || true
+# Check for test directories
+ls -d test/ tests/ spec/ 2>/dev/null
+# Check for CTest integration
+grep -r "enable_testing|add_test|ctest" CMakeLists.txt 2>/dev/null | head -3
 # Check opt-out marker
-[ -f .gstack/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
+[ -f .gstackplusplus/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
 ```
 
-**If test framework detected** (config files or test directories found):
-Print "Test framework detected: {name} ({N} existing tests). Skipping bootstrap."
-Read 2-3 existing test files to learn conventions (naming, imports, assertion style, setup patterns).
+**If test framework detected** (gtest/catch2/doctest/boost_test found in CMakeLists.txt):
+Print "Test framework detected: {name}. Skipping bootstrap."
+Read 2-3 existing test files to learn conventions (naming, assertion style, fixture patterns).
 Store conventions as prose context for use in Phase 8e.5 or Step 3.4. **Skip the rest of bootstrap.**
 
 **If BOOTSTRAP_DECLINED** appears: Print "Test bootstrap previously declined — skipping." **Skip the rest of bootstrap.**
 
-**If NO runtime detected** (no config files found): Use AskUserQuestion:
-"I couldn't detect your project's language. What runtime are you using?"
-Options: A) Node.js/TypeScript B) Ruby/Rails C) Python D) Go E) Rust F) PHP G) Elixir H) This project doesn't need tests.
-If user picks H → write `.gstack/no-test-bootstrap` and continue without tests.
+**If no test framework detected:** Use AskUserQuestion:
+"I couldn't detect a C++ test framework. Which one do you want to use?"
+Options: A) GoogleTest (gtest) — industry standard, widely supported B) Catch2 v3 — header-friendly, BDD-style C) doctest — ultra-lightweight, single-header D) This project doesn't need automated tests.
+If user picks D → write `.gstackplusplus/no-test-bootstrap` and continue without tests.
 
-**If runtime detected but no test framework — bootstrap:**
+**If framework chosen — bootstrap:**
 
-### B2. Research best practices
+### B2. Add test framework to CMake
 
-Use WebSearch to find current best practices for the detected runtime:
-- `"[runtime] best test framework 2025 2026"`
-- `"[framework A] vs [framework B] comparison"`
+**GoogleTest:**
+```cmake
+# Add to CMakeLists.txt
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+```
 
-If WebSearch is unavailable, use this built-in knowledge table:
+**Catch2:**
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.5.0
+)
+FetchContent_MakeAvailable(Catch2)
+enable_testing()
+include(Catch)
+```
 
-| Runtime | Primary recommendation | Alternative |
-|---------|----------------------|-------------|
-| Ruby/Rails | minitest + fixtures + capybara | rspec + factory_bot + shoulda-matchers |
-| Node.js | vitest + @testing-library | jest + @testing-library |
-| Next.js | vitest + @testing-library/react + playwright | jest + cypress |
-| Python | pytest + pytest-cov | unittest |
-| Go | stdlib testing + testify | stdlib only |
-| Rust | cargo test (built-in) + mockall | — |
-| PHP | phpunit + mockery | pest |
-| Elixir | ExUnit (built-in) + ex_machina | — |
+### B3. Create test directory structure
 
-### B3. Framework selection
+```bash
+mkdir -p test/unit test/integration
+```
 
-Use AskUserQuestion:
-"I detected this is a [Runtime/Framework] project with no test framework. I researched current best practices. Here are the options:
-A) [Primary] — [rationale]. Includes: [packages]. Supports: unit, integration, smoke, e2e
-B) [Alternative] — [rationale]. Includes: [packages]
-C) Skip — don't set up testing right now
-RECOMMENDATION: Choose A because [reason based on project context]"
+Add test CMakeLists.txt:
+```cmake
+# test/CMakeLists.txt
+add_subdirectory(unit)
+add_subdirectory(integration)
+```
 
-If user picks C → write `.gstack/no-test-bootstrap`. Tell user: "If you change your mind later, delete `.gstack/no-test-bootstrap` and re-run." Continue without tests.
+### B4. Write first real tests
 
-If multiple runtimes detected (monorepo) → ask which runtime to set up first, with option to do both sequentially.
+Find recently changed source files:
+```bash
+git log --since=30.days --name-only --format="" | grep "\.(cpp|cxx|cc)$" | sort | uniq -c | sort -rn | head -10
+```
 
-### B4. Install and configure
+Prioritize by risk: error handlers > business logic with conditionals > utility functions.
 
-1. Install the chosen packages (npm/bun/gem/pip/etc.)
-2. Create minimal config file
-3. Create directory structure (test/, spec/, etc.)
-4. Create one example test matching the project's code to verify setup works
+For each file, write one test exercising real behavior with meaningful assertions.
+Never write tests that just check "it compiles" — test what the code DOES.
 
-If package installation fails → debug once. If still failing → revert with `git checkout -- package.json package-lock.json` (or equivalent for the runtime). Warn user and continue without tests.
+**GTest example:**
+```cpp
+#include <gtest/gtest.h>
+#include "your_header.hpp"
 
-### B4.5. First real tests
-
-Generate 3-5 real tests for existing code:
-
-1. **Find recently changed files:** `git log --since=30.days --name-only --format="" | sort | uniq -c | sort -rn | head -10`
-2. **Prioritize by risk:** Error handlers > business logic with conditionals > API endpoints > pure functions
-3. **For each file:** Write one test that tests real behavior with meaningful assertions. Never `expect(x).toBeDefined()` — test what the code DOES.
-4. Run each test. Passes → keep. Fails → fix once. Still fails → delete silently.
-5. Generate at least 1 test, cap at 5.
-
-Never import secrets, API keys, or credentials in test files. Use environment variables or test fixtures.
+TEST(ModuleNameTest, DescribesBehavior) {
+  // Arrange
+  MyClass obj;
+  // Act
+  auto result = obj.doSomething(42);
+  // Assert
+  EXPECT_EQ(result, expected_value);
+}
+```
 
 ### B5. Verify
 
 ```bash
-# Run the full test suite to confirm everything works
-{detected test command}
+cmake --build $BUILD_DIR --target all
+ctest --test-dir $BUILD_DIR --output-on-failure
 ```
 
-If tests fail → debug once. If still failing → revert all bootstrap changes and warn user.
+If tests fail → debug once. If still failing → revert bootstrap changes and warn user.
 
-### B5.5. CI/CD pipeline
+### B6. CI/CD pipeline
 
 ```bash
-# Check CI provider
-ls -d .github/ 2>/dev/null && echo "CI:github"
-ls .gitlab-ci.yml .circleci/ bitrise.yml 2>/dev/null
+ls -d .github/ 2>/dev/null && echo "CI:github" || true
+ls .gitlab-ci.yml .circleci/ 2>/dev/null
 ```
 
-If `.github/` exists (or no CI detected — default to GitHub Actions):
-Create `.github/workflows/test.yml` with:
-- `runs-on: ubuntu-latest`
-- Appropriate setup action for the runtime (setup-node, setup-ruby, setup-python, etc.)
-- The same test command verified in B5
-- Trigger: push + pull_request
+If `.github/` exists or no CI detected — create `.github/workflows/ci.yml`:
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++ clang clang-tidy
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+```
 
-If non-GitHub CI detected → skip CI generation with note: "Detected {provider} — CI pipeline generation supports GitHub Actions only. Add test step to your existing pipeline manually."
-
-### B6. Create TESTING.md
-
-First check: If TESTING.md already exists → read it and update/append rather than overwriting. Never destroy existing content.
+### B7. Create TESTING.md
 
 Write TESTING.md with:
-- Philosophy: "100% test coverage is the key to great vibe coding. Tests let you move fast, trust your instincts, and ship with confidence — without them, vibe coding is just yolo coding. With tests, it's a superpower."
 - Framework name and version
-- How to run tests (the verified command from B5)
-- Test layers: Unit tests (what, where, when), Integration tests, Smoke tests, E2E tests
-- Conventions: file naming, assertion style, setup/teardown patterns
+- How to configure: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
+- How to build: `cmake --build build --parallel`
+- How to run tests: `ctest --test-dir build --output-on-failure`
+- How to run with sanitizers: `cmake -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined"`
+- How to run static analysis: `clang-tidy -p build src/*.cpp`
+- Conventions: file naming, test fixture patterns, mock patterns
 
-### B7. Update CLAUDE.md
+### B8. Update CLAUDE.md
 
-First check: If CLAUDE.md already has a `## Testing` section → skip. Don't duplicate.
-
-Append a `## Testing` section:
-- Run command and test directory
-- Reference to TESTING.md
+Append a `## Testing` section if not present:
+- CMake configure and build commands
+- CTest command to run all tests
 - Test expectations:
-  - 100% test coverage is the goal — tests make vibe coding safe
+  - 100% test coverage is the goal — tests make AI-assisted coding safe
   - When writing new functions, write a corresponding test
   - When fixing a bug, write a regression test
   - When adding error handling, write a test that triggers the error
   - When adding a conditional (if/else, switch), write tests for BOTH paths
   - Never commit code that makes existing tests fail
 
-### B8. Commit
+### B9. Commit
 
 ```bash
 git status --porcelain
 ```
 
-Only commit if there are changes. Stage all bootstrap files (config, test directory, TESTING.md, CLAUDE.md, .github/workflows/test.yml if created):
+Only commit if there are changes. Stage all bootstrap files:
 `git commit -m "chore: bootstrap test framework ({framework name})"`
 
 ---
 
 ---
 
-## Step 3: Run tests (on merged code)
+## Step 3: Build and run tests (on merged code)
 
-**Do NOT run `RAILS_ENV=test bin/rails db:migrate`** — `bin/test-lane` already calls
-`db:test:prepare` internally, which loads the schema into the correct lane database.
-Running bare test migrations without INSTANCE hits an orphan DB and corrupts structure.sql.
-
-Run both test suites in parallel:
+**Step 3a: Configure and build**
 
 ```bash
-bin/test-lane 2>&1 | tee /tmp/ship_tests.txt &
-npm run test 2>&1 | tee /tmp/ship_vitest.txt &
-wait
+# Configure (if build dir doesn't exist or CMakeLists.txt changed)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic" 2>&1 | tee /tmp/ship_cmake.txt
+
+# Build all targets
+cmake --build build --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) \
+  2>&1 | tee /tmp/ship_build.txt
 ```
 
-After both complete, read the output files and check pass/fail.
+**If build fails:** Show the errors and **STOP**. Do not proceed.
+
+**Step 3b: Run unit and integration tests**
+
+```bash
+ctest --test-dir build --output-on-failure -V 2>&1 | tee /tmp/ship_tests.txt
+```
 
 **If any test fails:** Show the failures and **STOP**. Do not proceed.
 
-**If all pass:** Continue silently — just note the counts briefly.
+**If all pass:** Continue silently — just note pass counts briefly.
+
+**Step 3c: Static analysis (non-blocking gate)**
+
+```bash
+# clang-tidy on changed files only
+git diff origin/<base> --name-only | grep -E "\.(cpp|cxx|cc)$" | \
+  xargs clang-tidy -p build --warnings-as-errors="" 2>&1 | tee /tmp/ship_clang_tidy.txt || true
+```
+
+**If clang-tidy finds issues:** Report them in the PR body but do NOT stop — static analysis findings are informational at ship time (they should have been fixed in `/review`). Flag them prominently.
 
 ---
 
-## Step 3.25: Eval Suites (conditional)
+## Step 3.25: Sanitizer Run (conditional)
 
-Evals are mandatory when prompt-related files change. Skip this step entirely if no prompt files are in the diff.
+Run sanitizers when memory-related, concurrency, or security-sensitive files are changed.
 
-**1. Check if the diff touches prompt-related files:**
+**1. Check if the diff touches high-risk files:**
 
 ```bash
 git diff origin/<base> --name-only
 ```
 
-Match against these patterns (from CLAUDE.md):
-- `app/services/*_prompt_builder.rb`
-- `app/services/*_generation_service.rb`, `*_writer_service.rb`, `*_designer_service.rb`
-- `app/services/*_evaluator.rb`, `*_scorer.rb`, `*_classifier_service.rb`, `*_analyzer.rb`
-- `app/services/concerns/*voice*.rb`, `*writing*.rb`, `*prompt*.rb`, `*token*.rb`
-- `app/services/chat_tools/*.rb`, `app/services/x_thread_tools/*.rb`
-- `config/system_prompts/*.txt`
-- `test/evals/**/*` (eval infrastructure changes affect all suites)
+Match against these patterns:
+- `src/**/*.cpp` — any source file change may introduce memory issues
+- `include/**/*.hpp` — API changes may change ownership semantics
+- `*thread*`, `*async*`, `*mutex*`, `*atomic*` — concurrency changes → ThreadSanitizer
+- `*network*`, `*socket*`, `*parser*`, `*input*` — input handling → UBSan + ASan
+- `*embedded*`, `*isr*`, `*interrupt*` — embedded code → stack analyzer
 
-**If no matches:** Print "No prompt-related files changed — skipping evals." and continue to Step 3.5.
+**If the diff is docs/comments/test-only:** Print "No high-risk files changed — skipping sanitizer run." and continue to Step 3.5.
 
-**2. Identify affected eval suites:**
-
-Each eval runner (`test/evals/*_eval_runner.rb`) declares `PROMPT_SOURCE_FILES` listing which source files affect it. Grep these to find which suites match the changed files:
+**2. Build with sanitizers:**
 
 ```bash
-grep -l "changed_file_basename" test/evals/*_eval_runner.rb
+# AddressSanitizer + UndefinedBehaviorSanitizer (most common)
+cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+  -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" 2>&1
+cmake --build build-asan --parallel $(nproc 2>/dev/null || echo 4) 2>&1 | tee /tmp/ship_asan_build.txt
 ```
 
-Map runner → test file: `post_generation_eval_runner.rb` → `post_generation_eval_test.rb`.
+If concurrency files changed, also run ThreadSanitizer (mutually exclusive with ASan):
+```bash
+cmake -S . -B build-tsan -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer" 2>&1
+cmake --build build-tsan --parallel $(nproc 2>/dev/null || echo 4) 2>&1
+```
 
-**Special cases:**
-- Changes to `test/evals/judges/*.rb`, `test/evals/support/*.rb`, or `test/evals/fixtures/` affect ALL suites that use those judges/support files. Check imports in the eval test files to determine which.
-- Changes to `config/system_prompts/*.txt` — grep eval runners for the prompt filename to find affected suites.
-- If unsure which suites are affected, run ALL suites that could plausibly be impacted. Over-testing is better than missing a regression.
-
-**3. Run affected suites at `EVAL_JUDGE_TIER=full`:**
-
-`/ship` is a pre-merge gate, so always use full tier (Sonnet structural + Opus persona judges).
+**3. Run tests under sanitizers:**
 
 ```bash
-EVAL_JUDGE_TIER=full EVAL_VERBOSE=1 bin/test-lane --eval test/evals/<suite>_eval_test.rb 2>&1 | tee /tmp/ship_evals.txt
+ASAN_OPTIONS=halt_on_error=0:detect_leaks=1 \
+UBSAN_OPTIONS=halt_on_error=0:print_stacktrace=1 \
+ctest --test-dir build-asan --output-on-failure -V 2>&1 | tee /tmp/ship_asan.txt
 ```
-
-If multiple suites need to run, run them sequentially (each needs a test lane). If the first suite fails, stop immediately — don't burn API cost on remaining suites.
 
 **4. Check results:**
+- **If ASan or UBSan reports errors:** Show the errors and **STOP**. Memory safety errors are release blockers.
+- **If ThreadSanitizer reports data races:** Show the races and **STOP**. Data races are undefined behavior.
+- **If all pass:** Note results. Continue to Step 3.5.
 
-- **If any eval fails:** Show the failures, the cost dashboard, and **STOP**. Do not proceed.
-- **If all pass:** Note pass counts and cost. Continue to Step 3.5.
-
-**5. Save eval output** — include eval results and cost dashboard in the PR body (Step 8).
-
-**Tier reference (for context — /ship always uses `full`):**
-| Tier | When | Speed (cached) | Cost |
-|------|------|----------------|------|
-| `fast` (Haiku) | Dev iteration, smoke tests | ~5s (14x faster) | ~$0.07/run |
-| `standard` (Sonnet) | Default dev, `bin/test-lane --eval` | ~17s (4x faster) | ~$0.37/run |
-| `full` (Opus persona) | **`/ship` and pre-merge** | ~72s (baseline) | ~$1.27/run |
+**5. Save sanitizer output** — include in the PR body (Step 8).
 
 ---
 
@@ -501,7 +531,8 @@ If multiple suites need to run, run them sequentially (each needs a test lane). 
 
 ```bash
 # Count test files before any generation
-find . -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' | grep -v node_modules | wc -l
+find . \( -name '*_test.cpp' -o -name '*_test.cxx' -o -name 'test_*.cpp' -o -name '*.test.cpp' \) \
+  | grep -v build | wc -l
 ```
 
 Store this number for the PR body.
@@ -525,24 +556,24 @@ Read every changed file. For each one, trace how data flows through the code —
 
 This is the critical step — you're building a map of every line of code that can execute differently based on input. Every branch in this diagram needs a test.
 
-**2. Map user flows, interactions, and error states:**
+**2. Map caller flows, API entry points, error states, and principle violations (YAGNI/KISS/DRY/SOLID):**
 
-Code coverage isn't enough — you need to cover how real users interact with the changed code. For each changed feature, think through:
+Line coverage isn't enough — you need to cover how callers interact with the changed APIs. For each changed module, think through:
 
-- **User flows:** What sequence of actions does a user take that touches this code? Map the full journey (e.g., "user clicks 'Pay' → form validates → API call → success/failure screen"). Each step in the journey needs a test.
-- **Interaction edge cases:** What happens when the user does something unexpected?
-  - Double-click/rapid resubmit
-  - Navigate away mid-operation (back button, close tab, click another link)
-  - Submit with stale data (page sat open for 30 minutes, session expired)
-  - Slow connection (API takes 10 seconds — what does the user see?)
-  - Concurrent actions (two tabs, same form)
-- **Error states the user can see:** For every error the code handles, what does the user actually experience?
-  - Is there a clear error message or a silent failure?
-  - Can the user recover (retry, go back, fix input) or are they stuck?
-  - What happens with no network? With a 500 from the API? With invalid data from the server?
-- **Empty/zero/boundary states:** What does the UI show with zero results? With 10,000 results? With a single character input? With maximum-length input?
+- **Caller flows:** What sequence of calls does a caller make? Map the full lifecycle (e.g., "caller creates Connection → calls connect() → sends data → closes"). Each step needs a test. Caller flow coverage is the C++ equivalent of user flow coverage — the caller is your user.
+- **Boundary conditions:**
+  - Empty input (empty string, null pointer, zero-length buffer, empty span)
+  - Maximum-size input (buffer exactly full, integer at max value, size_t overflow)
+  - Invalid input (out-of-range enum, null where non-null expected, misaligned pointer)
+  - Concurrent callers (two threads calling the same object simultaneously)
+- **Error paths:** For every error the code can return or throw:
+  - Is there a test that exercises that specific error condition?
+  - What happens when the caller ignores the error? (silent UB vs. safe failure)
+  - Is the error message actionable?
+- **Platform-specific paths:** For embedded code, are there ISR-safe paths tested separately from normal context? For server code, is the shutdown path tested?
+- **Interaction edge cases:** What happens when the caller uses the API unexpectedly — calls a method after move, passes overlapping spans, constructs from a moved-from state?
 
-Add these to your diagram alongside the code branches. A user flow with no test is just as much a gap as an untested if/else.
+Add these to your diagram alongside the code branches. An untested error path is as dangerous as a buffer overflow waiting to happen.
 
 **3. Check each branch against existing tests:**
 
@@ -561,41 +592,41 @@ Quality scoring rubric:
 
 **4. Output ASCII coverage diagram:**
 
-Include BOTH code paths and user flows in the same diagram:
+Include BOTH code paths and caller flows in the same diagram:
 
 ```
 CODE PATH COVERAGE
 ===========================
-[+] src/services/billing.ts
+[+] src/net/connection.cpp
     │
-    ├── processPayment()
-    │   ├── [★★★ TESTED] Happy path + card declined + timeout — billing.test.ts:42
-    │   ├── [GAP]         Network timeout — NO TEST
-    │   └── [GAP]         Invalid currency — NO TEST
+    ├── Connection::connect()
+    │   ├── [★★★ TESTED] Happy path + timeout + refused — connection_test.cpp:42
+    │   ├── [GAP]         Already-connected state — NO TEST
+    │   └── [GAP]         DNS lookup failure — NO TEST
     │
-    └── refundPayment()
-        ├── [★★  TESTED] Full refund — billing.test.ts:89
-        └── [★   TESTED] Partial refund (checks non-throw only) — billing.test.ts:101
+    └── Connection::send()
+        ├── [★★  TESTED] Normal send — connection_test.cpp:89
+        └── [★   TESTED] Partial write (checks non-throw only) — connection_test.cpp:101
 
-USER FLOW COVERAGE
+CALLER FLOW COVERAGE
 ===========================
-[+] Payment checkout flow
+[+] Connection lifecycle (caller's perspective)
     │
-    ├── [★★★ TESTED] Complete purchase — checkout.e2e.ts:15
-    ├── [GAP]         Double-click submit — NO TEST
-    ├── [GAP]         Navigate away during payment — NO TEST
-    └── [★   TESTED] Form validation errors (checks render only) — checkout.test.ts:40
+    ├── [★★★ TESTED] Create → connect → send → close — lifecycle_test.cpp:15
+    ├── [GAP]         Concurrent callers (thread safety) — NO TEST
+    ├── [GAP]         ISR context (signal handler safe?) — NO TEST
+    └── [★   TESTED] Move semantics (checks non-crash only) — lifecycle_test.cpp:40
 
-[+] Error states
+[+] Error states callers will encounter
     │
-    ├── [★★  TESTED] Card declined message — billing.test.ts:58
-    ├── [GAP]         Network timeout UX (what does user see?) — NO TEST
-    └── [GAP]         Empty cart submission — NO TEST
+    ├── [★★  TESTED] ECONNREFUSED propagated correctly — connection_test.cpp:58
+    ├── [GAP]         Caller ignores error_code (silent UB?) — NO TEST
+    └── [GAP]         Empty/zero-length send — NO TEST
 
 ─────────────────────────────────
 COVERAGE: 5/12 paths tested (42%)
   Code paths: 3/5 (60%)
-  User flows: 2/7 (29%)
+  Caller flows: 2/7 (29%)
 QUALITY:  ★★★: 2  ★★: 2  ★: 1
 GAPS: 7 paths need tests
 ─────────────────────────────────
@@ -623,7 +654,8 @@ If no test framework AND user declined bootstrap → diagram only, no generation
 
 ```bash
 # Count test files after generation
-find . -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' | grep -v node_modules | wc -l
+find . \( -name '*_test.cpp' -o -name '*_test.cxx' -o -name 'test_*.cpp' -o -name '*.test.cpp' \) \
+  | grep -v build | wc -l
 ```
 
 For PR body: `Tests: {before} → {after} (+{delta} new)`
@@ -643,37 +675,37 @@ Review the diff for structural issues that tests don't catch.
    - **Pass 1 (CRITICAL):** SQL & Data Safety, LLM Output Trust Boundary
    - **Pass 2 (INFORMATIONAL):** All remaining categories
 
-## Design Review (conditional, diff-scoped)
+## API Design Review (conditional, diff-scoped)
 
-Check if the diff touches frontend files using `gstack-diff-scope`:
+Check if the diff touches public interface files using `gstackplusplus-diff-scope`:
 
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-diff-scope <base> 2>/dev/null)
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-diff-scope <base> 2>/dev/null)
 ```
 
-**If `SCOPE_FRONTEND=false`:** Skip design review silently. No output.
+**If `SCOPE_FRONTEND=false` and no header files changed:** Skip API design review silently. No output.
 
-**If `SCOPE_FRONTEND=true`:**
+**If header files (.h, .hpp) appear in the diff OR `SCOPE_FRONTEND=true`:**
 
-1. **Check for DESIGN.md.** If `DESIGN.md` or `design-system.md` exists in the repo root, read it. All design findings are calibrated against it — patterns blessed in DESIGN.md are not flagged. If not found, use universal design principles.
+1. **Check for API.md.** If `API.md`, `DESIGN.md`, or similar exists in the repo root, read it. All API findings are calibrated against it — patterns blessed in API.md are not flagged. If not found, use the universal C++ API design principles below.
 
-2. **Read `.claude/skills/review/design-checklist.md`.** If the file cannot be read, skip design review with a note: "Design checklist not found — skipping design review."
+2. **Read `.claude/skills/review/api-design-checklist.md`.** If the file cannot be read, skip with a note: "API design checklist not found — skipping API design review."
 
-3. **Read each changed frontend file** (full file, not just diff hunks). Frontend files are identified by the patterns listed in the checklist.
+3. **Read each changed header file** (full file, not just diff hunks). Header files are identified by .h, .hpp, .hxx extensions.
 
-4. **Apply the design checklist** against the changed files. For each item:
-   - **[HIGH] mechanical CSS fix** (`outline: none`, `!important`, `font-size < 16px`): classify as AUTO-FIX
-   - **[HIGH/MEDIUM] design judgment needed**: classify as ASK
-   - **[LOW] intent-based detection**: present as "Possible — verify visually or run /design-review"
+4. **Apply the API design checklist** against the changed headers. For each item:
+   - **[HIGH] mechanical fix** (missing `const`, raw owning pointer, undocumented precondition): classify as AUTO-FIX
+   - **[HIGH/MEDIUM] design judgment needed** (naming, error strategy, ownership model): classify as ASK
+   - **[LOW] style/documentation**: present as "Consider — verify with team style guide or run /design-review"
 
-5. **Include findings** in the review output under a "Design Review" header, following the output format in the checklist. Design findings merge with code review findings into the same Fix-First flow.
+5. **Include findings** in the review output under an "API Design Review" header, following the Fix-First flow in Step 5 — AUTO-FIX for mechanical fixes, ASK for everything else.
 
 6. **Log the result** for the Review Readiness Dashboard:
 
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
-echo '{"skill":"design-review-lite","timestamp":"TIMESTAMP","status":"STATUS","findings":N,"auto_fixed":M}' >> ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
+echo '{"skill":"design-review-lite","timestamp":"TIMESTAMP","status":"STATUS","findings":N,"auto_fixed":M}' >> ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl
 ```
 
 Substitute: TIMESTAMP = ISO 8601 datetime, STATUS = "clean" if 0 findings or "issues_found", N = total findings, M = auto-fixed count.
@@ -846,17 +878,17 @@ Save this summary — it goes into the PR body in Step 8.
 1. Analyze the diff and group changes into logical commits. Each commit should represent **one coherent change** — not one file, but one logical unit.
 
 2. **Commit ordering** (earlier commits first):
-   - **Infrastructure:** migrations, config changes, route additions
-   - **Models & services:** new models, services, concerns (with their tests)
-   - **Controllers & views:** controllers, views, JS/React components (with their tests)
+   - **Build system:** CMakeLists.txt changes, toolchain config, dependency additions
+   - **Interfaces/headers:** .h/.hpp changes (API contracts before implementations)
+   - **Implementations:** .cpp files implementing the headers (with their tests)
+   - **Tests:** additional test files not already bundled with their implementation
    - **VERSION + CHANGELOG + TODOS.md:** always in the final commit
 
 3. **Rules for splitting:**
-   - A model and its test file go in the same commit
-   - A service and its test file go in the same commit
-   - A controller, its views, and its test go in the same commit
-   - Migrations are their own commit (or grouped with the model they support)
-   - Config/route changes can group with the feature they enable
+   - A header and its implementation go in the same commit
+   - A source file and its test file go in the same commit
+   - CMakeLists.txt changes go with the target they affect
+   - Refactors are their own commit (separate from behavior changes)
    - If the total diff is small (< 50 lines across < 4 files), a single commit is fine
 
 4. **Each commit must be independently valid** — no broken imports, no references to code that doesn't exist yet. Order commits so dependencies come first.
@@ -896,6 +928,10 @@ gh pr create --base <base> --title "<type>: <summary>" --body "$(cat <<'EOF'
 ## Summary
 <bullet points from CHANGELOG>
 
+## Build & Test Results
+<build status: compiler, warnings count>
+<test results: pass/fail counts, any failures>
+
 ## Test Coverage
 <coverage diagram from Step 3.4, or "All new code paths have test coverage.">
 <If Step 3.4 ran: "Tests: {before} → {after} (+{delta} new)">
@@ -903,12 +939,15 @@ gh pr create --base <base> --title "<type>: <summary>" --body "$(cat <<'EOF'
 ## Pre-Landing Review
 <findings from Step 3.5 code review, or "No issues found.">
 
-## Design Review
-<If design review ran: "Design Review (lite): N findings — M auto-fixed, K skipped. AI Slop: clean/N issues.">
-<If no frontend files changed: "No frontend files changed — design review skipped.">
+## API Design Review
+<If header files changed: "API Design Review (lite): N findings — M auto-fixed, K skipped.">
+<If no header files changed: "No public headers changed — API design review skipped.">
 
-## Eval Results
-<If evals ran: suite names, pass/fail counts, cost dashboard summary. If skipped: "No prompt-related files changed — evals skipped.">
+## Sanitizer Results
+<If sanitizers ran: ASan/UBSan/TSan pass/fail. If skipped: "No high-risk files changed — sanitizer run skipped.">
+
+## Static Analysis
+<clang-tidy findings summary, or "No static analysis findings.">
 
 ## Greptile Review
 <If Greptile comments were found: bullet list with [FIXED] / [FALSE POSITIVE] / [ALREADY FIXED] tag + one-line summary per comment>
@@ -922,8 +961,10 @@ gh pr create --base <base> --title "<type>: <summary>" --body "$(cat <<'EOF'
 <If TODOS.md doesn't exist and user skipped: omit this section>
 
 ## Test plan
-- [x] All Rails tests pass (N runs, 0 failures)
-- [x] All Vitest tests pass (N tests)
+- [x] Build passes with zero errors (compiler: clang++/g++, flags: -Wall -Wextra)
+- [x] All unit tests pass (N tests, 0 failures)
+- [x] No ASan/UBSan errors detected
+- [x] clang-tidy: N findings (M auto-fixed)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF

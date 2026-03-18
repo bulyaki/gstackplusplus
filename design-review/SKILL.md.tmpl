@@ -2,10 +2,10 @@
 name: design-review
 version: 2.0.0
 description: |
-  Designer's eye QA: finds visual inconsistency, spacing issues, hierarchy problems,
-  AI slop patterns, and slow interactions — then fixes them. Iteratively fixes issues
-  in source code, committing each fix atomically and re-verifying with before/after
-  screenshots. For plan-mode design review (before implementation), use /plan-design-review.
+  C++ API design audit: finds ownership ambiguity, naming inconsistency, missing const,
+  unsafe interfaces, documentation gaps, and thread safety issues — then fixes them.
+  Iteratively fixes issues in headers and source, committing each fix atomically and
+  re-verifying. For plan-mode API design review (before implementation), use /plan-design-review.
 allowed-tools:
   - Bash
   - Read
@@ -19,28 +19,27 @@ allowed-tools:
 
 {{PREAMBLE}}
 
-# /design-review: Design Audit → Fix → Verify
+# /design-review: API Design Audit → Fix → Verify
 
-You are a senior product designer AND a frontend engineer. Review live sites with exacting visual standards — then fix what you find. You have strong opinions about typography, spacing, and visual hierarchy, and zero tolerance for generic or AI-generated-looking interfaces.
+You are a senior C++ API designer AND engineer. Review public headers and interfaces with exacting design standards — then fix what you find. You have strong opinions about ownership clarity, const correctness, error handling consistency, and interface usability.
 
+
+{{DESIGN_PRINCIPLES}}
 ## Setup
 
 **Parse the user's request for these parameters:**
 
 | Parameter | Default | Override example |
 |-----------|---------|-----------------:|
-| Target URL | (auto-detect or ask) | `https://myapp.com`, `http://localhost:3000` |
-| Scope | Full site | `Focus on the settings page`, `Just the homepage` |
-| Depth | Standard (5-8 pages) | `--quick` (homepage + 2), `--deep` (10-15 pages) |
-| Auth | None | `Sign in as user@example.com`, `Import cookies` |
+| Scope | All public headers | `Focus on the network module`, `Just include/parser/` |
+| Depth | Standard (all headers) | `--quick` (primary header only), `--deep` (headers + key .cpp files) |
+| Module | (auto-detect from include/) | `src/storage`, `lib/protocol` |
 
-**If no URL is given and you're on a feature branch:** Automatically enter **diff-aware mode** (see Modes below).
+**If no module is given and you're on a feature branch:** Automatically enter **diff-aware mode** (scope to changed headers).
 
-**If no URL is given and you're on main/master:** Ask the user for a URL.
+**Check for API.md:**
 
-**Check for DESIGN.md:**
-
-Look for `DESIGN.md`, `design-system.md`, or similar in the repo root. If found, read it — all design decisions must be calibrated against it. Deviations from the project's stated design system are higher severity. If not found, use universal design principles and offer to create one from the inferred system.
+Look for `API.md`, `DESIGN.md`, `API-GUIDELINES.md`, or similar in the repo root. If found, read it — all API findings are calibrated against it. If not found, use the universal C++ API design principles from the methodology.
 
 **Require clean working tree before starting:**
 
@@ -51,7 +50,7 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 ```
 
-**Find the browse binary:**
+**Check C++ toolchain:**
 
 {{BROWSE_SETUP}}
 
@@ -62,35 +61,26 @@ fi
 **Create output directories:**
 
 ```bash
-REPORT_DIR=".gstack/design-reports"
-mkdir -p "$REPORT_DIR/screenshots"
+REPORT_DIR=".gstackplusplus/api-design-reports"
+mkdir -p "$REPORT_DIR"
 ```
 
 ---
 
-## Phases 1-6: Design Audit Baseline
+## Phases 1-6: API Design Audit Baseline
 
 {{DESIGN_METHODOLOGY}}
 
-Record baseline design score and AI slop score at end of Phase 6.
+Record baseline API design score at end of Phase 6.
 
 ---
 
 ## Output Structure
 
 ```
-.gstack/design-reports/
-├── design-audit-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
-│   ├── first-impression.png                  # Phase 1
-│   ├── {page}-annotated.png                  # Per-page annotated
-│   ├── {page}-mobile.png                     # Responsive
-│   ├── {page}-tablet.png
-│   ├── {page}-desktop.png
-│   ├── finding-001-before.png                # Before fix
-│   ├── finding-001-after.png                 # After fix
-│   └── ...
-└── design-baseline.json                      # For regression mode
+.gstackplusplus/api-design-reports/
+├── api-design-audit-{module}-{YYYY-MM-DD}.md    # Structured report
+├── api-design-baseline.json                       # For regression mode
 ```
 
 ---
@@ -99,11 +89,11 @@ Record baseline design score and AI slop score at end of Phase 6.
 
 Sort all discovered findings by impact, then decide which to fix:
 
-- **High Impact:** Fix first. These affect the first impression and hurt user trust.
-- **Medium Impact:** Fix next. These reduce polish and are felt subconsciously.
-- **Polish:** Fix if time allows. These separate good from great.
+- **High Impact:** Fix first. These cause misuse, crashes, or data corruption in caller code.
+- **Medium Impact:** Fix next. These reduce usability or increase maintenance burden.
+- **Polish:** Fix if time allows. These separate good from great API design.
 
-Mark findings that cannot be fixed from source code (e.g., third-party widget issues, content problems requiring copy from the team) as "deferred" regardless of impact.
+Mark findings that cannot be fixed without breaking ABI (changing function signature of a public API in a released library) as "deferred" — note the next release window.
 
 ---
 
@@ -114,17 +104,19 @@ For each fixable finding, in impact order:
 ### 8a. Locate source
 
 ```bash
-# Search for CSS classes, component names, style files
-# Glob for file patterns matching the affected page
+# Search for the function/class/type in headers
+grep -rn "function_name\|ClassName" include/ src/
+# Find all callers of changed API
+grep -rn "old_function_name" src/ test/
 ```
 
-- Find the source file(s) responsible for the design issue
+- Find the header file(s) responsible for the API issue
+- Find all implementation files and callers that need updating
 - ONLY modify files directly related to the finding
-- Prefer CSS/styling changes over structural component changes
 
 ### 8b. Fix
 
-- Read the source code, understand the context
+- Read the header, understand the full API context
 - Make the **minimal fix** — smallest change that resolves the design issue
 - CSS-only changes are preferred (safer, more reversible)
 - Do NOT refactor surrounding code, add features, or "improve" unrelated things
@@ -204,14 +196,14 @@ After all fixes are applied:
 
 Write the report to both local and project-scoped locations:
 
-**Local:** `.gstack/design-reports/design-audit-{domain}-{YYYY-MM-DD}.md`
+**Local:** `.gstackplusplus/design-reports/design-audit-{domain}-{YYYY-MM-DD}.md`
 
 **Project-scoped:**
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-design-audit-{datetime}.md`
+Write to `~/.gstackplusplus/projects/{slug}/{user}-{branch}-design-audit-{datetime}.md`
 
 **Per-finding additions** (beyond standard design audit report):
 - Fix Status: verified / best-effort / reverted / deferred

@@ -6,10 +6,10 @@
 
 This checklist applies to **source code in the diff** — not rendered output. Read each changed frontend file (full file, not just diff hunks) and flag anti-patterns.
 
-**Trigger:** Only run this checklist if the diff touches frontend files. Use `gstack-diff-scope` to detect:
+**Trigger:** Only run this checklist if the diff touches frontend files. Use `gstackplusplus-diff-scope` to detect:
 
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-diff-scope <base> 2>/dev/null)
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-diff-scope <base> 2>/dev/null)
 ```
 
 If `SCOPE_FRONTEND=false`, skip the entire design review silently.

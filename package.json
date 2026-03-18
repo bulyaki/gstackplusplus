@@ -1,7 +1,7 @@
 {
-  "name": "gstack",
+  "name": "gstackplusplus",
   "version": "0.3.3",
-  "description": "Garry's Stack — Claude Code skills + fast headless browser. One repo, one install, entire AI engineering workflow.",
+  "description": "gstack++ — C++ workflow skills and fast headless browser tooling that can coexist with the original upstream install.",
   "license": "MIT",
   "type": "module",
   "bin": {

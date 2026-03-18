@@ -1,0 +1,259 @@
+---
+name: cursor
+version: 1.0.0
+description: |
+  Configure gstack++ for Cursor — the AI code editor. Adapts gstack++ workflows for
+  Cursor's Agent/Composer model: .cursorrules project instructions, checkpoint-based
+  review before applying diffs, @-mention context injection, and Cursor's terminal
+  execution model. Run this once per project to set model_mode=cursor in
+  ~/.gstackplusplus/config. All subsequent gstack++ skills will auto-adapt.
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - AskUserQuestion
+
+---
+<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
+<!-- Regenerate: bun run gen:skill-docs -->
+
+# gstack++ × Cursor: Configuration & Adaptation Guide
+
+This skill configures gstack++ for use with **Cursor** (Agent mode, Composer, or inline
+chat). Cursor is an AI-first editor built on VS Code with deep codebase indexing,
+multi-file Composer edits, and a checkpoint system for reviewing changes before they
+land. This skill tunes gstack++'s output format and workflow to match Cursor's
+edit-then-review model rather than Claude Code's chat-and-apply model.
+
+---
+
+## Step 1: Detect environment
+
+```bash
+# Detect toolchain availability
+command -v cmake 2>/dev/null && echo "CMAKE:ok" || echo "CMAKE:missing"
+command -v clang++ 2>/dev/null || command -v g++ 2>/dev/null && echo "CXX:ok" || echo "CXX:missing"
+command -v ctest 2>/dev/null && echo "CTEST:ok" || echo "CTEST:missing"
+command -v clang-tidy 2>/dev/null && echo "CLANG_TIDY:ok" || echo "CLANG_TIDY:missing"
+command -v valgrind 2>/dev/null && echo "VALGRIND:ok" || echo "VALGRIND:missing"
+# Check build system
+[ -f CMakeLists.txt ] && echo "BUILD:cmake"
+[ -f Makefile ] && echo "BUILD:make"
+[ -f meson.build ] && echo "BUILD:meson"
+# Check for existing .cursorrules
+[ -f .cursorrules ] && echo "CURSORRULES:exists" || echo "CURSORRULES:missing"
+```
+
+## Step 2: Write model configuration
+
+```bash
+mkdir -p ~/.gstackplusplus
+~/.claude/skills/gstackplusplus/bin/gstackplusplus-config set model_mode cursor 2>/dev/null || \
+  python3 -c "
+import os, re
+cfg = os.path.expanduser('~/.gstackplusplus/config.yaml')
+text = open(cfg).read() if os.path.exists(cfg) else ''
+text = re.sub(r'model_mode:.*\n', '', text)
+open(cfg, 'w').write(text + 'model_mode: cursor\n')
+"
+echo "gstack++ model_mode set to: cursor"
+```
+
+## Step 3: Write or update .cursorrules
+
+Write (or append) the gstack++ section to `.cursorrules` in the project root. This
+is the primary way to give Cursor persistent project context:
+
+```markdown
+## gstack++ — C++ development skills
+
+Available skills: /plan-ceo-review, /plan-eng-review, /plan-design-review,
+/design-consultation, /review, /ship, /qa, /qa-only, /design-review,
+/retro, /document-release
+
+C++ toolchain: cmake, ctest, clang-tidy, cppcheck, ASan/UBSan/TSan, valgrind
+Build dir convention: `build/` for debug, `build-asan/` for sanitizer builds
+
+### Cursor mode adaptations in effect:
+
+**Checkpoint-friendly output.** gstack++ produces changes as clearly scoped,
+independently reviewable edits. Each fix is a self-contained unit that makes
+sense in Cursor's checkpoint diff view — no interleaved refactors and behavior
+changes in the same checkpoint.
+
+**Use @-mentions for context.** When invoking gstack++ skills from Cursor Agent,
+use `@CMakeLists.txt`, `@build/`, or `@<file>` to give the agent the right
+context upfront rather than having it discover files through Bash.
+
+**Composer for multi-file changes.** Use Cursor Composer (Cmd+I) for gstack++
+skills that touch multiple files (/review, /qa, /ship). Use inline chat (Cmd+K)
+for single-file fixes after a /qa-only report.
+
+**Model selection.** For architecture and design skills (/plan-eng-review,
+/design-consultation, /design-review), use claude-4-sonnet or claude-4-opus in
+Cursor's model selector for deeper analysis. For fast iteration (/qa, /review),
+claude-3-5-sonnet or GPT-4o work well.
+```
+
+## Step 4: Write project CLAUDE.md (for non-Cursor sessions)
+
+Also write the standard gstack++ entry to `CLAUDE.md` so the project works across
+all platforms:
+
+```markdown
+## gstack++ (Cursor mode)
+
+Model: Cursor Agent / Composer
+Available skills: /plan-ceo-review, /plan-eng-review, /plan-design-review,
+/design-consultation, /review, /ship, /qa, /qa-only, /design-review,
+/retro, /document-release
+C++ toolchain: cmake, ctest, clang-tidy, cppcheck, ASan/UBSan/TSan, valgrind
+```
+
+
+---
+
+## Design Principles: KISS · DRY · SOLID · YAGNI
+
+Apply these four principles throughout all analysis, recommendations, and fixes.
+They are listed in priority order — when they conflict, prefer the earlier one.
+
+| Principle | Priority | What it means in C++ | Watch for |
+|-----------|----------|----------------------|-----------|
+| **YAGNI** — You Ain't Gonna Need It | 1 (highest) | Build for today's requirements. No template parameters for hypothetical future types, no virtual methods before you have two concrete implementations, no generalization beyond the current use case. | Template type params with one instantiation, virtual methods with one override, `// will be useful when…` comments, policy classes with no alternate policy |
+| **KISS** — Keep It Simple | 2 | Prefer the simplest solution that works. No clever metaprogramming when a plain function suffices. Write for the engineer debugging at 3 am. | Multi-level template specialisations for a single case, SFINAE chains that could be `if constexpr`, `auto`-everything obscuring types, "clever" one-liners that need a comment to explain themselves |
+| **DRY** — Don't Repeat Yourself | 3 | Every piece of knowledge has one authoritative home. Factor repeated logic into shared helpers, base classes, or macros of last resort. | Same algorithm in two files, copy-pasted error-handling blocks, duplicated constants, parallel `switch` statements that must always change together |
+| **SOLID** | 4 | **S**ingle Responsibility · **O**pen/Closed · **L**iskov Substitution · **I**nterface Segregation · **D**ependency Inversion. Each class does one thing; extend by addition not modification; subtypes are drop-in replacements; interfaces are minimal; dependencies are injected not hard-coded. | God classes/files, `if (type == X)` dispatch that should be virtual, non-substitutable subclasses that override preconditions, fat interfaces with unrelated methods, singletons and global state that make testing impossible |
+
+### Principle interactions in practice
+
+- Favour **YAGNI over SOLID**: don't introduce an interface abstraction until you have two concrete implementations. One implementation = no interface needed yet.
+- Favour **KISS over DRY**: a small, clear duplication is better than a clever abstraction that obscures intent. Abstract when the duplication hurts, not as soon as you see two similar lines.
+- **DRY is not about lines of code** — it is about knowledge. Two functions that happen to look similar but represent independent business rules should stay separate.
+- **SOLID's D (Dependency Inversion) enables testing**: if a component is hard to test in isolation, the fix is usually to inject the dependency rather than to mock globals.
+
+---
+
+## Cursor-Specific Behavioral Rules
+
+These rules apply to ALL gstack++ skills when `model_mode=cursor` is set:
+
+### 1. Checkpoint-scoped changes
+
+Cursor's checkpoint system shows the user a diff after each edit batch. Structure
+gstack++ changes so each checkpoint contains one logical unit:
+- One bug fix per checkpoint
+- One refactor per checkpoint (never bundle with a behavior change)
+- Test additions in their own checkpoint after the fix they cover
+
+Never mix: a fix to `parser.cpp` and a refactor of `handler.cpp` should be two
+separate edit operations so each appears as a clean, reviewable checkpoint.
+
+### 2. @-mention aware output
+
+When reporting findings, reference files by their repo-relative path so Cursor
+can make them clickable via `@filename`:
+
+```
+ISSUE-001 [HIGH]: Buffer overread in `@src/parser.cpp:42`
+  → `parse()` reads `buf[len]` without checking `len < capacity`
+  → Fix: add `if (len >= capacity_) return ParseResult::overflow;` before read
+```
+
+This lets the user cmd-click directly to the site in the editor.
+
+### 3. Terminal command format
+
+Cursor Agent runs terminal commands in the integrated terminal. Format commands
+for single-line execution (no here-docs, no multi-line bash):
+
+```bash
+# Good — single logical command
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build --parallel $(nproc)
+
+# Good — sequential with status
+ctest --test-dir build --output-on-failure -j$(nproc) && echo "TESTS: OK" || echo "TESTS: FAILED"
+```
+
+Avoid multi-line bash blocks with `\` continuations — they display awkwardly in
+Cursor's terminal and can fail silently.
+
+### 4. Inline suggestion format for /qa-only
+
+When running `/qa-only` from Cursor, format findings so they can be fed directly
+into Cursor's inline chat for targeted fixes:
+
+```
+--- FINDING REPORT (paste into Cursor inline chat at the relevant file) ---
+
+@src/parser.cpp line 42:
+ISSUE-001 [HIGH] Buffer overread: `buf[len]` without bounds check.
+Fix: add `if (len >= capacity_) return ParseResult::overflow;`
+
+@src/handler.cpp line 89:
+ISSUE-002 [MEDIUM] Shared dispatch table accessed without mutex.
+Fix: wrap reads/writes in `std::lock_guard<std::mutex> lock(dispatch_mutex_);`
+```
+
+### 5. .cursorrules stays current
+
+After `/document-release` or any skill that updates `CLAUDE.md`, also update
+`.cursorrules` to keep it in sync. The `.cursorrules` file is Cursor's primary
+context source and drifts faster than `CLAUDE.md` if not maintained together.
+
+### 6. AskUserQuestion stays on
+
+Cursor Agent supports interactive questions in the chat panel. Use `AskUserQuestion`
+normally — Cursor users expect the same interactive decision flow as Claude Code.
+Do not suppress questions as in Codex mode.
+
+---
+
+## Skills and Cursor Compatibility
+
+| Skill | Cursor support | Best invocation | Notes |
+|-------|---------------|-----------------|-------|
+| `/plan-ceo-review` | ✅ Full | Composer | Use `@plan.md` or `@TODOS.md` for context |
+| `/plan-eng-review` | ✅ Full | Composer | Use `@CMakeLists.txt @src/` for context |
+| `/plan-design-review` | ✅ Full | Composer | Use `@include/` or `@api/` for context |
+| `/design-consultation` | ✅ Full | Composer | Generates `API.md` as a new-file diff |
+| `/review` | ✅ Full | Composer | Each fix → one checkpoint |
+| `/ship` | ✅ Full | Composer + Terminal | Runs cmake/ctest in Cursor's terminal |
+| `/qa` | ✅ Full | Composer + Terminal | Streaming build output in terminal |
+| `/qa-only` | ✅ Full | Agent chat | Produces `@file:line` formatted report |
+| `/design-review` | ✅ Full | Composer | Checkpoint per API change |
+| `/retro` | ✅ Full | Agent chat | Stats output in chat panel |
+| `/document-release` | ✅ Full | Composer | Also updates `.cursorrules` |
+
+---
+
+## Cursor Preamble
+
+```bash
+# Re-detect toolchain for this session
+_CMAKE=$(command -v cmake 2>/dev/null || echo "")
+_CXX=$(command -v clang++ 2>/dev/null || command -v g++ 2>/dev/null || echo "")
+_BUILD_DIR=$([ -d build ] && echo "build" || echo "build")
+_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+mkdir -p ~/.gstackplusplus/sessions
+touch ~/.gstackplusplus/sessions/"$$"
+echo "BRANCH: $_BRANCH"
+echo "MODEL_MODE: cursor"
+# Check .cursorrules is present
+[ -f .cursorrules ] && echo "CURSORRULES: present" || echo "CURSORRULES: missing — run /cursor to generate"
+```
+
+---
+
+## Quick-start: first run checklist
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build --parallel $(nproc 2>/dev/null || echo 4) && echo "BUILD: OK"
+ctest --test-dir build --output-on-failure && echo "TESTS: OK"
+mkdir -p .gstackplusplus && echo "cursor_mode_active: true" > .gstackplusplus/session-config.yaml
+echo "gstack++ Cursor mode ready"
+```
+
+**Recommended first skill run after setup:** `/qa-only` from Cursor Agent chat —
+the `@file:line` formatted report feeds directly into Cursor's inline chat for
+targeted one-by-one fixes using Cursor's checkpoint review workflow.

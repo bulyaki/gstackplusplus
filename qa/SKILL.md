@@ -2,12 +2,13 @@
 name: qa
 version: 2.0.0
 description: |
-  Systematically QA test a web application and fix bugs found. Runs QA testing,
-  then iteratively fixes bugs in source code, committing each fix atomically and
-  re-verifying. Use when asked to "qa", "QA", "test this site", "find bugs",
-  "test and fix", or "fix what's broken". Three tiers: Quick (critical/high only),
-  Standard (+ medium), Exhaustive (+ cosmetic). Produces before/after health scores,
-  fix evidence, and a ship-readiness summary. For report-only mode, use /qa-only.
+  Systematically QA test a C++ application, server, or embedded project and fix bugs found.
+  Builds the project, runs tests, runs static analysis, runs memory checkers, then iteratively
+  fixes bugs in source code, committing each fix atomically and re-verifying. Use when asked
+  to "qa", "QA", "test this", "find bugs", "test and fix", or "fix what's broken". Three
+  tiers: Quick (critical/high only), Standard (+ medium), Exhaustive (+ cosmetic). Produces
+  before/after health scores, fix evidence, and a ship-readiness summary.
+  For report-only mode, use /qa-only.
 allowed-tools:
   - Bash
   - Read
@@ -24,29 +25,29 @@ allowed-tools:
 ## Preamble (run first)
 
 ```bash
-_UPD=$(~/.claude/skills/gstack/bin/gstack-update-check 2>/dev/null || .claude/skills/gstack/bin/gstack-update-check 2>/dev/null || true)
+_UPD=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || .claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
-mkdir -p ~/.gstack/sessions
-touch ~/.gstack/sessions/"$PPID"
-_SESSIONS=$(find ~/.gstack/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
-find ~/.gstack/sessions -mmin +120 -type f -delete 2>/dev/null || true
-_CONTRIB=$(~/.claude/skills/gstack/bin/gstack-config get gstack_contributor 2>/dev/null || true)
+mkdir -p ~/.gstackplusplus/sessions
+touch ~/.gstackplusplus/sessions/"$PPID"
+_SESSIONS=$(find ~/.gstackplusplus/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
+find ~/.gstackplusplus/sessions -mmin +120 -type f -delete 2>/dev/null || true
+_CONTRIB=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-config get gstackplusplus_contributor 2>/dev/null || true)
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo "BRANCH: $_BRANCH"
-_LAKE_SEEN=$([ -f ~/.gstack/.completeness-intro-seen ] && echo "yes" || echo "no")
+_LAKE_SEEN=$([ -f ~/.gstackplusplus/.completeness-intro-seen ] && echo "yes" || echo "no")
 echo "LAKE_INTRO: $_LAKE_SEEN"
 ```
 
-If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstack/gstack-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack v{to} (just updated!)" and continue.
+If output shows `UPGRADE_AVAILABLE <old> <new>`: read `~/.claude/skills/gstackplusplus/gstackplusplus-upgrade/SKILL.md` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If `JUST_UPGRADED <from> <to>`: tell user "Running gstack++ v{to} (just updated!)" and continue.
 
 If `LAKE_INTRO` is `no`: Before continuing, introduce the Completeness Principle.
-Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
+Tell the user: "gstack++ follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
 Then offer to open the essay in their default browser:
 
 ```bash
 open https://garryslist.org/posts/boil-the-ocean
-touch ~/.gstack/.completeness-intro-seen
+touch ~/.gstackplusplus/.completeness-intro-seen
 ```
 
 Only run `open` if the user says yes. Always run `touch` to mark as seen. This only happens once.
@@ -67,11 +68,11 @@ Per-skill instructions may add additional formatting rules on top of this baseli
 
 AI-assisted coding makes the marginal cost of completeness near-zero. When you present options:
 
-- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack. "Good enough" is the wrong instinct when "complete" costs minutes more.
+- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack++. "Good enough" is the wrong instinct when "complete" costs minutes more.
 - **Lake vs. ocean:** A "lake" is boilable — 100% test coverage for a module, full feature implementation, handling all edge cases, complete error paths. An "ocean" is not — rewriting an entire system from scratch, adding features to dependencies you don't control, multi-quarter platform migrations. Recommend boiling lakes. Flag oceans as out of scope.
-- **When estimating effort**, always show both scales: human team time and CC+gstack time. The compression ratio varies by task type — use this reference:
+- **When estimating effort**, always show both scales: human team time and CC+gstack++ time. The compression ratio varies by task type — use this reference:
 
-| Task type | Human team | CC+gstack | Compression |
+| Task type | Human team | CC+gstack++ | Compression |
 |-----------|-----------|-----------|-------------|
 | Boilerplate / scaffolding | 2 days | 15 min | ~100x |
 | Test writing | 1 day | 15 min | ~50x |
@@ -90,20 +91,20 @@ AI-assisted coding makes the marginal cost of completeness near-zero. When you p
 
 ## Contributor Mode
 
-If `_CONTRIB` is `true`: you are in **contributor mode**. You're a gstack user who also helps make it better.
+If `_CONTRIB` is `true`: you are in **contributor mode**. You're a gstack++ user who also helps make it better.
 
-**At the end of each major workflow step** (not after every single command), reflect on the gstack tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack code or skill markdown — file a field report. Maybe our contributor will help make us better!
+**At the end of each major workflow step** (not after every single command), reflect on the gstack++ tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack++ code or skill markdown — file a field report. Maybe our contributor will help make us better!
 
-**Calibration — this is the bar:** For example, `$B js "await fetch(...)"` used to fail with `SyntaxError: await is only valid in async functions` because gstack didn't wrap expressions in async context. Small, but the input was reasonable and gstack should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
+**Calibration — this is the bar:** For example, `$B js "await fetch(...)"` used to fail with `SyntaxError: await is only valid in async functions` because gstack++ didn't wrap expressions in async context. Small, but the input was reasonable and gstack++ should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
 
 **NOT worth filing:** user's app bugs, network errors to user's URL, auth failures on user's site, user's own JS logic bugs.
 
-**To file:** write `~/.gstack/contributor-logs/{slug}.md` with **all sections below** (do not truncate — include every section through the Date/Version footer):
+**To file:** write `~/.gstackplusplus/contributor-logs/{slug}.md` with **all sections below** (do not truncate — include every section through the Date/Version footer):
 
 ```
 # {Title}
 
-Hey gstack team — ran into this while using /{skill-name}:
+Hey gstack++ team — ran into this while using /{skill-name}:
 
 **What I was trying to do:** {what the user/agent was attempting}
 **What happened instead:** {what actually happened}
@@ -118,12 +119,12 @@ Hey gstack team — ran into this while using /{skill-name}:
 ```
 
 ## What would make this a 10
-{one sentence: what gstack should have done differently}
+{one sentence: what gstack++ should have done differently}
 
-**Date:** {YYYY-MM-DD} | **Version:** {gstack version} | **Skill:** /{skill}
+**Date:** {YYYY-MM-DD} | **Version:** {gstack++ version} | **Skill:** /{skill}
 ```
 
-Slug: lowercase, hyphens, max 60 chars (e.g. `browse-js-no-await`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack field report: {title}"
+Slug: lowercase, hyphens, max 60 chars (e.g. `browse-js-no-await`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack++ field report: {title}"
 
 ## Step 0: Detect base branch
 
@@ -144,9 +145,9 @@ branch name wherever the instructions say "the base branch."
 
 ---
 
-# /qa: Test → Fix → Verify
+# /qa: Build → Test → Fix → Verify
 
-You are a QA engineer AND a bug-fix engineer. Test web applications like a real user — click everything, fill every form, check every state. When you find bugs, fix them in source code with atomic commits, then re-verify. Produce a structured report with before/after evidence.
+You are a QA engineer AND a bug-fix engineer. Test C++ applications, servers, and embedded projects thoroughly — build with warnings, run unit tests, run static analysis, run memory checkers. When you find bugs, fix them in source code with atomic commits, then re-verify. Produce a structured report with before/after evidence.
 
 ## Setup
 
@@ -154,19 +155,19 @@ You are a QA engineer AND a bug-fix engineer. Test web applications like a real 
 
 | Parameter | Default | Override example |
 |-----------|---------|-----------------:|
-| Target URL | (auto-detect or required) | `https://myapp.com`, `http://localhost:3000` |
+| Target | (auto-detect from CMakeLists.txt) | `build/my_binary`, `--target my_lib` |
 | Tier | Standard | `--quick`, `--exhaustive` |
-| Mode | full | `--regression .gstack/qa-reports/baseline.json` |
-| Output dir | `.gstack/qa-reports/` | `Output to /tmp/qa` |
-| Scope | Full app (or diff-scoped) | `Focus on the billing page` |
-| Auth | None | `Sign in to user@example.com`, `Import cookies from cookies.json` |
+| Mode | full | `--regression .gstackplusplus/qa-reports/baseline.json` |
+| Output dir | `.gstackplusplus/qa-reports/` | `Output to /tmp/qa` |
+| Scope | Full project (or diff-scoped) | `Focus on the network module` |
+| Sanitizers | ASan+UBSan | `--no-sanitizers`, `--tsan` (ThreadSanitizer) |
 
 **Tiers determine which issues get fixed:**
-- **Quick:** Fix critical + high severity only
-- **Standard:** + medium severity (default)
-- **Exhaustive:** + low/cosmetic severity
+- **Quick:** Fix critical + high severity only (build errors, test failures, ASan errors)
+- **Standard:** + medium severity (compiler warnings, static analysis findings) (default)
+- **Exhaustive:** + low/cosmetic severity (style, documentation gaps)
 
-**If no URL is given and you're on a feature branch:** Automatically enter **diff-aware mode** (see Modes below). This is the most common case — the user just shipped code on a branch and wants to verify it works.
+**If no target is given and you're on a feature branch:** Automatically enter **diff-aware mode** (see Modes below). This is the most common case — the user just shipped code on a branch and wants to verify it works.
 
 **Require clean working tree before starting:**
 ```bash
@@ -176,178 +177,216 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 ```
 
-**Find the browse binary:**
+**Check C++ toolchain:**
 
-## SETUP (run this check BEFORE any browse command)
+## SETUP (run this toolchain check BEFORE any build/test command)
 
 ```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B=~/.claude/skills/gstack/browse/dist/browse
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
+# Detect build system
+CMAKE_BIN=$(command -v cmake 2>/dev/null || echo "")
+MAKE_BIN=$(command -v make 2>/dev/null || echo "")
+NINJA_BIN=$(command -v ninja 2>/dev/null || echo "")
+CXX_BIN=$(command -v clang++ 2>/dev/null || command -v g++ 2>/dev/null || echo "")
+CTEST_BIN=$(command -v ctest 2>/dev/null || echo "")
+CLANG_TIDY_BIN=$(command -v clang-tidy 2>/dev/null || echo "")
+VALGRIND_BIN=$(command -v valgrind 2>/dev/null || echo "")
+[ -n "$CMAKE_BIN" ] && echo "CMAKE:$CMAKE_BIN" || echo "CMAKE:MISSING"
+[ -n "$CXX_BIN" ] && echo "CXX:$CXX_BIN" || echo "CXX:MISSING"
+[ -n "$CTEST_BIN" ] && echo "CTEST:$CTEST_BIN" || echo "CTEST:MISSING"
+[ -n "$CLANG_TIDY_BIN" ] && echo "CLANG_TIDY:$CLANG_TIDY_BIN" || echo "CLANG_TIDY:MISSING"
+[ -n "$VALGRIND_BIN" ] && echo "VALGRIND:$VALGRIND_BIN" || echo "VALGRIND:MISSING"
+# Detect build directory
+[ -d build ] && echo "BUILD_DIR:build" || [ -d cmake-build-debug ] && echo "BUILD_DIR:cmake-build-debug" || [ -d out ] && echo "BUILD_DIR:out" || echo "BUILD_DIR:NONE"
+# Detect project type
+[ -f CMakeLists.txt ] && echo "BUILD_SYSTEM:cmake"
+[ -f Makefile ] && echo "BUILD_SYSTEM:make"
+[ -f meson.build ] && echo "BUILD_SYSTEM:meson"
+[ -f BUILD ] || [ -f BUILD.bazel ] && echo "BUILD_SYSTEM:bazel"
 ```
 
-If `NEEDS_SETUP`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: `cd <SKILL_DIR> && ./setup`
-3. If `bun` is not installed: `curl -fsSL https://bun.sh/install | bash`
+If `CMAKE:MISSING` or `CXX:MISSING`: warn the user that the required toolchain is not installed.
+Suggest: `sudo apt-get install cmake g++ clang clang-tidy valgrind` (Linux) or `brew install cmake llvm valgrind` (macOS).
+
+If `BUILD_DIR:NONE` and `BUILD_SYSTEM:cmake`: the project has not been configured yet.
+Run the CMake configure step before building:
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+```
+
+Store the build directory as `$BUILD_DIR` for use in subsequent steps.
 
 **Check test framework (bootstrap if needed):**
 
 ## Test Framework Bootstrap
 
-**Detect existing test framework and project runtime:**
+**Detect existing test framework and C++ project setup:**
 
 ```bash
-# Detect project runtime
-[ -f Gemfile ] && echo "RUNTIME:ruby"
-[ -f package.json ] && echo "RUNTIME:node"
-[ -f requirements.txt ] || [ -f pyproject.toml ] && echo "RUNTIME:python"
-[ -f go.mod ] && echo "RUNTIME:go"
-[ -f Cargo.toml ] && echo "RUNTIME:rust"
-[ -f composer.json ] && echo "RUNTIME:php"
-[ -f mix.exs ] && echo "RUNTIME:elixir"
-# Detect sub-frameworks
-[ -f Gemfile ] && grep -q "rails" Gemfile 2>/dev/null && echo "FRAMEWORK:rails"
-[ -f package.json ] && grep -q '"next"' package.json 2>/dev/null && echo "FRAMEWORK:nextjs"
-# Check for existing test infrastructure
-ls jest.config.* vitest.config.* playwright.config.* .rspec pytest.ini pyproject.toml phpunit.xml 2>/dev/null
-ls -d test/ tests/ spec/ __tests__/ cypress/ e2e/ 2>/dev/null
+# Detect build system
+[ -f CMakeLists.txt ] && echo "BUILD:cmake" || true
+[ -f Makefile ] && echo "BUILD:make" || true
+[ -f meson.build ] && echo "BUILD:meson" || true
+# Detect test framework
+grep -r "gtest|googletest|GTest" CMakeLists.txt 2>/dev/null && echo "TEST_FW:gtest" || true
+grep -r "Catch2|CATCH_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:catch2" || true
+grep -r "doctest|DOCTEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:doctest" || true
+grep -r "boost.*test|BOOST_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:boost_test" || true
+# Check for test directories
+ls -d test/ tests/ spec/ 2>/dev/null
+# Check for CTest integration
+grep -r "enable_testing|add_test|ctest" CMakeLists.txt 2>/dev/null | head -3
 # Check opt-out marker
-[ -f .gstack/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
+[ -f .gstackplusplus/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
 ```
 
-**If test framework detected** (config files or test directories found):
-Print "Test framework detected: {name} ({N} existing tests). Skipping bootstrap."
-Read 2-3 existing test files to learn conventions (naming, imports, assertion style, setup patterns).
+**If test framework detected** (gtest/catch2/doctest/boost_test found in CMakeLists.txt):
+Print "Test framework detected: {name}. Skipping bootstrap."
+Read 2-3 existing test files to learn conventions (naming, assertion style, fixture patterns).
 Store conventions as prose context for use in Phase 8e.5 or Step 3.4. **Skip the rest of bootstrap.**
 
 **If BOOTSTRAP_DECLINED** appears: Print "Test bootstrap previously declined — skipping." **Skip the rest of bootstrap.**
 
-**If NO runtime detected** (no config files found): Use AskUserQuestion:
-"I couldn't detect your project's language. What runtime are you using?"
-Options: A) Node.js/TypeScript B) Ruby/Rails C) Python D) Go E) Rust F) PHP G) Elixir H) This project doesn't need tests.
-If user picks H → write `.gstack/no-test-bootstrap` and continue without tests.
+**If no test framework detected:** Use AskUserQuestion:
+"I couldn't detect a C++ test framework. Which one do you want to use?"
+Options: A) GoogleTest (gtest) — industry standard, widely supported B) Catch2 v3 — header-friendly, BDD-style C) doctest — ultra-lightweight, single-header D) This project doesn't need automated tests.
+If user picks D → write `.gstackplusplus/no-test-bootstrap` and continue without tests.
 
-**If runtime detected but no test framework — bootstrap:**
+**If framework chosen — bootstrap:**
 
-### B2. Research best practices
+### B2. Add test framework to CMake
 
-Use WebSearch to find current best practices for the detected runtime:
-- `"[runtime] best test framework 2025 2026"`
-- `"[framework A] vs [framework B] comparison"`
+**GoogleTest:**
+```cmake
+# Add to CMakeLists.txt
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+```
 
-If WebSearch is unavailable, use this built-in knowledge table:
+**Catch2:**
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.5.0
+)
+FetchContent_MakeAvailable(Catch2)
+enable_testing()
+include(Catch)
+```
 
-| Runtime | Primary recommendation | Alternative |
-|---------|----------------------|-------------|
-| Ruby/Rails | minitest + fixtures + capybara | rspec + factory_bot + shoulda-matchers |
-| Node.js | vitest + @testing-library | jest + @testing-library |
-| Next.js | vitest + @testing-library/react + playwright | jest + cypress |
-| Python | pytest + pytest-cov | unittest |
-| Go | stdlib testing + testify | stdlib only |
-| Rust | cargo test (built-in) + mockall | — |
-| PHP | phpunit + mockery | pest |
-| Elixir | ExUnit (built-in) + ex_machina | — |
+### B3. Create test directory structure
 
-### B3. Framework selection
+```bash
+mkdir -p test/unit test/integration
+```
 
-Use AskUserQuestion:
-"I detected this is a [Runtime/Framework] project with no test framework. I researched current best practices. Here are the options:
-A) [Primary] — [rationale]. Includes: [packages]. Supports: unit, integration, smoke, e2e
-B) [Alternative] — [rationale]. Includes: [packages]
-C) Skip — don't set up testing right now
-RECOMMENDATION: Choose A because [reason based on project context]"
+Add test CMakeLists.txt:
+```cmake
+# test/CMakeLists.txt
+add_subdirectory(unit)
+add_subdirectory(integration)
+```
 
-If user picks C → write `.gstack/no-test-bootstrap`. Tell user: "If you change your mind later, delete `.gstack/no-test-bootstrap` and re-run." Continue without tests.
+### B4. Write first real tests
 
-If multiple runtimes detected (monorepo) → ask which runtime to set up first, with option to do both sequentially.
+Find recently changed source files:
+```bash
+git log --since=30.days --name-only --format="" | grep "\.(cpp|cxx|cc)$" | sort | uniq -c | sort -rn | head -10
+```
 
-### B4. Install and configure
+Prioritize by risk: error handlers > business logic with conditionals > utility functions.
 
-1. Install the chosen packages (npm/bun/gem/pip/etc.)
-2. Create minimal config file
-3. Create directory structure (test/, spec/, etc.)
-4. Create one example test matching the project's code to verify setup works
+For each file, write one test exercising real behavior with meaningful assertions.
+Never write tests that just check "it compiles" — test what the code DOES.
 
-If package installation fails → debug once. If still failing → revert with `git checkout -- package.json package-lock.json` (or equivalent for the runtime). Warn user and continue without tests.
+**GTest example:**
+```cpp
+#include <gtest/gtest.h>
+#include "your_header.hpp"
 
-### B4.5. First real tests
-
-Generate 3-5 real tests for existing code:
-
-1. **Find recently changed files:** `git log --since=30.days --name-only --format="" | sort | uniq -c | sort -rn | head -10`
-2. **Prioritize by risk:** Error handlers > business logic with conditionals > API endpoints > pure functions
-3. **For each file:** Write one test that tests real behavior with meaningful assertions. Never `expect(x).toBeDefined()` — test what the code DOES.
-4. Run each test. Passes → keep. Fails → fix once. Still fails → delete silently.
-5. Generate at least 1 test, cap at 5.
-
-Never import secrets, API keys, or credentials in test files. Use environment variables or test fixtures.
+TEST(ModuleNameTest, DescribesBehavior) {
+  // Arrange
+  MyClass obj;
+  // Act
+  auto result = obj.doSomething(42);
+  // Assert
+  EXPECT_EQ(result, expected_value);
+}
+```
 
 ### B5. Verify
 
 ```bash
-# Run the full test suite to confirm everything works
-{detected test command}
+cmake --build $BUILD_DIR --target all
+ctest --test-dir $BUILD_DIR --output-on-failure
 ```
 
-If tests fail → debug once. If still failing → revert all bootstrap changes and warn user.
+If tests fail → debug once. If still failing → revert bootstrap changes and warn user.
 
-### B5.5. CI/CD pipeline
+### B6. CI/CD pipeline
 
 ```bash
-# Check CI provider
-ls -d .github/ 2>/dev/null && echo "CI:github"
-ls .gitlab-ci.yml .circleci/ bitrise.yml 2>/dev/null
+ls -d .github/ 2>/dev/null && echo "CI:github" || true
+ls .gitlab-ci.yml .circleci/ 2>/dev/null
 ```
 
-If `.github/` exists (or no CI detected — default to GitHub Actions):
-Create `.github/workflows/test.yml` with:
-- `runs-on: ubuntu-latest`
-- Appropriate setup action for the runtime (setup-node, setup-ruby, setup-python, etc.)
-- The same test command verified in B5
-- Trigger: push + pull_request
+If `.github/` exists or no CI detected — create `.github/workflows/ci.yml`:
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++ clang clang-tidy
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+```
 
-If non-GitHub CI detected → skip CI generation with note: "Detected {provider} — CI pipeline generation supports GitHub Actions only. Add test step to your existing pipeline manually."
-
-### B6. Create TESTING.md
-
-First check: If TESTING.md already exists → read it and update/append rather than overwriting. Never destroy existing content.
+### B7. Create TESTING.md
 
 Write TESTING.md with:
-- Philosophy: "100% test coverage is the key to great vibe coding. Tests let you move fast, trust your instincts, and ship with confidence — without them, vibe coding is just yolo coding. With tests, it's a superpower."
 - Framework name and version
-- How to run tests (the verified command from B5)
-- Test layers: Unit tests (what, where, when), Integration tests, Smoke tests, E2E tests
-- Conventions: file naming, assertion style, setup/teardown patterns
+- How to configure: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
+- How to build: `cmake --build build --parallel`
+- How to run tests: `ctest --test-dir build --output-on-failure`
+- How to run with sanitizers: `cmake -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined"`
+- How to run static analysis: `clang-tidy -p build src/*.cpp`
+- Conventions: file naming, test fixture patterns, mock patterns
 
-### B7. Update CLAUDE.md
+### B8. Update CLAUDE.md
 
-First check: If CLAUDE.md already has a `## Testing` section → skip. Don't duplicate.
-
-Append a `## Testing` section:
-- Run command and test directory
-- Reference to TESTING.md
+Append a `## Testing` section if not present:
+- CMake configure and build commands
+- CTest command to run all tests
 - Test expectations:
-  - 100% test coverage is the goal — tests make vibe coding safe
+  - 100% test coverage is the goal — tests make AI-assisted coding safe
   - When writing new functions, write a corresponding test
   - When fixing a bug, write a regression test
   - When adding error handling, write a test that triggers the error
   - When adding a conditional (if/else, switch), write tests for BOTH paths
   - Never commit code that makes existing tests fail
 
-### B8. Commit
+### B9. Commit
 
 ```bash
 git status --porcelain
 ```
 
-Only commit if there are changes. Stage all bootstrap files (config, test directory, TESTING.md, CLAUDE.md, .github/workflows/test.yml if created):
+Only commit if there are changes. Stage all bootstrap files:
 `git commit -m "chore: bootstrap test framework ({framework name})"`
 
 ---
@@ -355,7 +394,8 @@ Only commit if there are changes. Stage all bootstrap files (config, test direct
 **Create output directories:**
 
 ```bash
-mkdir -p .gstack/qa-reports/screenshots
+mkdir -p .gstackplusplus/qa-reports
+REPORT_DIR=".gstackplusplus/qa-reports"
 ```
 
 ---
@@ -364,10 +404,10 @@ mkdir -p .gstack/qa-reports/screenshots
 
 Before falling back to git diff heuristics, check for richer test plan sources:
 
-1. **Project-scoped test plans:** Check `~/.gstack/projects/` for recent `*-test-plan-*.md` files for this repo
+1. **Project-scoped test plans:** Check `~/.gstackplusplus/projects/` for recent `*-test-plan-*.md` files for this repo
    ```bash
-   eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-   ls -t ~/.gstack/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
+   eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+   ls -t ~/.gstackplusplus/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
    ```
 2. **Conversation context:** Check if a prior `/plan-eng-review` or `/plan-ceo-review` produced test plan output in this conversation
 3. **Use whichever source is richer.** Fall back to git diff analysis only if neither is available.
@@ -378,9 +418,9 @@ Before falling back to git diff heuristics, check for richer test plan sources:
 
 ## Modes
 
-### Diff-aware (automatic when on a feature branch with no URL)
+### Diff-aware (automatic when on a feature branch)
 
-This is the **primary mode** for developers verifying their work. When the user says `/qa` without a URL and the repo is on a feature branch, automatically:
+This is the **primary mode** for developers verifying their work. When the user says `/qa` without a specific target and the repo is on a feature branch, automatically:
 
 1. **Analyze the branch diff** to understand what changed:
    ```bash
@@ -388,48 +428,34 @@ This is the **primary mode** for developers verifying their work. When the user 
    git log main..HEAD --oneline
    ```
 
-2. **Identify affected pages/routes** from the changed files:
-   - Controller/route files → which URL paths they serve
-   - View/template/component files → which pages render them
-   - Model/service files → which pages use those models (check controllers that reference them)
-   - CSS/style files → which pages include those stylesheets
-   - API endpoints → test them directly with `$B js "await fetch('/api/...')"`
-   - Static pages (markdown, HTML) → navigate to them directly
+2. **Identify affected modules/components** from the changed files:
+   - Source files (.cpp, .cxx, .cc) → which compiled units changed
+   - Header files (.h, .hpp) → which API contracts or data structures changed
+   - CMakeLists.txt changes → which build targets were added/modified
+   - Test files → which tests were added or modified
 
-3. **Detect the running app** — check common local dev ports:
+3. **Determine test scope** — build and run only tests related to changed modules:
    ```bash
-   $B goto http://localhost:3000 2>/dev/null && echo "Found app on :3000" || \
-   $B goto http://localhost:4000 2>/dev/null && echo "Found app on :4000" || \
-   $B goto http://localhost:8080 2>/dev/null && echo "Found app on :8080"
+   cmake --build $BUILD_DIR --target <affected-target> 2>&1
+   ctest --test-dir $BUILD_DIR -R "<test-pattern>" -V 2>&1
    ```
-   If no local app is found, check for a staging/preview URL in the PR or environment. If nothing works, ask the user for the URL.
 
-4. **Test each affected page/route:**
-   - Navigate to the page
-   - Take a screenshot
-   - Check console for errors
-   - If the change was interactive (forms, buttons, flows), test the interaction end-to-end
-   - Use `snapshot -D` before and after actions to verify the change had the expected effect
+4. **Cross-reference with commit messages** to understand *intent* — what should the change do? Verify tests cover that intent.
 
-5. **Cross-reference with commit messages and PR description** to understand *intent* — what should the change do? Verify it actually does that.
+5. **Check TODOS.md** (if it exists) for known bugs related to changed files. If a TODO describes a bug this branch should fix, add it to the test plan.
 
-6. **Check TODOS.md** (if it exists) for known bugs or issues related to the changed files. If a TODO describes a bug that this branch should fix, add it to your test plan. If you find a new bug during QA that isn't in TODOS.md, note it in the report.
+6. **Report findings** scoped to the branch changes:
+   - "Changed modules: N .cpp files, M headers"
+   - For each: do existing tests pass? Any new failures?
 
-7. **Report findings** scoped to the branch changes:
-   - "Changes tested: N pages/routes affected by this branch"
-   - For each: does it work? Screenshot evidence.
-   - Any regressions on adjacent pages?
-
-**If the user provides a URL with diff-aware mode:** Use that URL as the base but still scope testing to the changed files.
-
-### Full (default when URL is provided)
-Systematic exploration. Visit every reachable page. Document 5-10 well-evidenced issues. Produce health score. Takes 5-15 minutes depending on app size.
+### Full (default)
+Build all targets, run full test suite, run static analysis, run memory checks. Produce health score. Takes 2-10 minutes depending on project size.
 
 ### Quick (`--quick`)
-30-second smoke test. Visit homepage + top 5 navigation targets. Check: page loads? Console errors? Broken links? Produce health score. No detailed issue documentation.
+Build and run only smoke tests (fastest subset). Check: does it compile? Do unit tests pass? No memory analysis. Produce health score.
 
 ### Regression (`--regression <baseline>`)
-Run full mode, then load `baseline.json` from a previous run. Diff: which issues are fixed? Which are new? What's the score delta? Append regression section to report.
+Run full mode, then load `baseline.json` from a previous run. Diff: which issues are fixed? Which are new? What's the score delta?
 
 ---
 
@@ -437,136 +463,121 @@ Run full mode, then load `baseline.json` from a previous run. Diff: which issues
 
 ### Phase 1: Initialize
 
-1. Find browse binary (see Setup above)
+1. Check toolchain (see Setup above)
 2. Create output directories
-3. Copy report template from `qa/templates/qa-report-template.md` to output dir
+3. Configure build if needed (cmake configure step)
 4. Start timer for duration tracking
 
-### Phase 2: Authenticate (if needed)
-
-**If the user specified auth credentials:**
+### Phase 2: Build
 
 ```bash
-$B goto <login-url>
-$B snapshot -i                    # find the login form
-$B fill @e3 "user@example.com"
-$B fill @e4 "[REDACTED]"         # NEVER include real passwords in report
-$B click @e5                      # submit
-$B snapshot -D                    # verify login succeeded
+# Full build with all warnings enabled
+cmake --build $BUILD_DIR --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) 2>&1 | tee $REPORT_DIR/build.log
 ```
 
-**If the user provided a cookie file:**
+**Parse build output for:**
+- Errors (compilation failures)
+- Warnings: `-Wall -Wextra -Wpedantic` warnings are issues
+  - `-Wunused-*`: dead code
+  - `-Wshadow`: shadowed variables
+  - `-Wconversion`: implicit narrowing
+  - `-Wnull-dereference`: potential null deref
+  - `-Wformat-security`: format string issues
+
+**If build fails:** Document every error. STOP — no point running tests on code that doesn't compile.
+
+### Phase 3: Unit Tests
 
 ```bash
-$B cookie-import cookies.json
-$B goto <target-url>
+ctest --test-dir $BUILD_DIR --output-on-failure -V 2>&1 | tee $REPORT_DIR/test.log
 ```
 
-**If 2FA/OTP is required:** Ask the user for the code and wait.
+**Parse test output for:**
+- Test pass/fail counts
+- FAILED test names and assertion messages
+- Timeout failures (test took too long → possible hang/infinite loop)
+- Segfault or signal-based failures (immediate memory safety red flag)
 
-**If CAPTCHA blocks you:** Tell the user: "Please complete the CAPTCHA in the browser, then tell me to continue."
+For GTest output, look for:
+- `[  FAILED  ] TestSuite.TestCase`
+- `Segmentation fault` in test output
+- `SIGABRT` from assert failures
 
-### Phase 3: Orient
-
-Get a map of the application:
+### Phase 4: Static Analysis
 
 ```bash
-$B goto <target-url>
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/initial.png"
-$B links                          # map navigation structure
-$B console --errors               # any errors on landing?
+# clang-tidy (if compile_commands.json available)
+if [ -f $BUILD_DIR/compile_commands.json ]; then
+  find . -name "*.cpp" -not -path "*/build/*" -not -path "*/test/*" | \
+    head -50 | xargs clang-tidy -p $BUILD_DIR 2>&1 | tee $REPORT_DIR/clang-tidy.log
+fi
+
+# cppcheck (supplementary)
+cppcheck --enable=all --suppress=missingIncludeSystem \
+  --error-exitcode=1 --xml --xml-version=2 \
+  -I include/ src/ 2>$REPORT_DIR/cppcheck.xml || true
 ```
 
-**Detect framework** (note in report metadata):
-- `__next` in HTML or `_next/data` requests → Next.js
-- `csrf-token` meta tag → Rails
-- `wp-content` in URLs → WordPress
-- Client-side routing with no page reloads → SPA
+**clang-tidy checks to flag as issues:**
+- `bugprone-*`: likely bugs
+- `cppcoreguidelines-*`: guideline violations
+- `clang-analyzer-*`: static analysis findings
+- `performance-*`: performance issues
+- `modernize-*`: outdated C++ patterns (flag as informational)
+- `readability-*`: readability issues (flag as low severity)
 
-**For SPAs:** The `links` command may return few results because navigation is client-side. Use `snapshot -i` to find nav elements (buttons, menu items) instead.
+**cppcheck findings to flag:**
+- `error` severity: always a critical issue
+- `warning` severity: high issue
+- `performance`, `style`: low/informational issue
 
-### Phase 4: Explore
+### Phase 5: Memory Analysis
 
-Visit pages systematically. At each page:
-
+**AddressSanitizer (preferred — build-time):**
 ```bash
-$B goto <page-url>
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/page-name.png"
-$B console --errors
+# Check if ASan build exists or build one
+if cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+    -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" 2>&1; then
+  cmake --build build-asan --parallel $(nproc 2>/dev/null || echo 4) 2>&1
+  ASAN_OPTIONS=halt_on_error=0 ctest --test-dir build-asan -V 2>&1 | tee $REPORT_DIR/asan.log
+fi
 ```
 
-Then follow the **per-page exploration checklist** (see `qa/references/issue-taxonomy.md`):
-
-1. **Visual scan** — Look at the annotated screenshot for layout issues
-2. **Interactive elements** — Click buttons, links, controls. Do they work?
-3. **Forms** — Fill and submit. Test empty, invalid, edge cases
-4. **Navigation** — Check all paths in and out
-5. **States** — Empty state, loading, error, overflow
-6. **Console** — Any new JS errors after interactions?
-7. **Responsiveness** — Check mobile viewport if relevant:
-   ```bash
-   $B viewport 375x812
-   $B screenshot "$REPORT_DIR/screenshots/page-mobile.png"
-   $B viewport 1280x720
-   ```
-
-**Depth judgment:** Spend more time on core features (homepage, dashboard, checkout, search) and less on secondary pages (about, terms, privacy).
-
-**Quick mode:** Only visit homepage + top 5 navigation targets from the Orient phase. Skip the per-page checklist — just check: loads? Console errors? Broken links visible?
-
-### Phase 5: Document
-
-Document each issue **immediately when found** — don't batch them.
-
-**Two evidence tiers:**
-
-**Interactive bugs** (broken flows, dead buttons, form failures):
-1. Take a screenshot before the action
-2. Perform the action
-3. Take a screenshot showing the result
-4. Use `snapshot -D` to show what changed
-5. Write repro steps referencing screenshots
-
+**Valgrind (fallback — slower but works with any binary):**
 ```bash
-$B screenshot "$REPORT_DIR/screenshots/issue-001-step-1.png"
-$B click @e5
-$B screenshot "$REPORT_DIR/screenshots/issue-001-result.png"
-$B snapshot -D
+# Run test binary under valgrind if ASan unavailable
+valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all \
+  --error-exitcode=1 --xml=yes --xml-file=$REPORT_DIR/valgrind.xml \
+  <test-binary> 2>&1 | tee $REPORT_DIR/valgrind.log || true
 ```
 
-**Static bugs** (typos, layout issues, missing images):
-1. Take a single annotated screenshot showing the problem
-2. Describe what's wrong
-
-```bash
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/issue-002.png"
-```
-
-**Write each issue to the report immediately** using the template format from `qa/templates/qa-report-template.md`.
+**Parse for:**
+- Heap use-after-free: critical issue
+- Buffer overflow/underflow: critical issue
+- Memory leaks (reachable): high issue; (definitely lost): critical issue
+- Uninitialized value reads: high issue
+- Invalid free / double-free: critical issue
+- Stack overflows (embedded projects): critical issue
 
 ### Phase 6: Wrap Up
 
 1. **Compute health score** using the rubric below
-2. **Write "Top 3 Things to Fix"** — the 3 highest-severity issues
-3. **Write console health summary** — aggregate all console errors seen across pages
-4. **Update severity counts** in the summary table
-5. **Fill in report metadata** — date, duration, pages visited, screenshot count, framework
+2. **Write "Top 3 Things to Fix"** — highest-severity issues
+3. **Write build health summary** — warning count, error count
+4. **Write test health summary** — pass rate, failures
+5. **Fill in report metadata** — date, duration, compiler, platform, build type
 6. **Save baseline** — write `baseline.json` with:
    ```json
    {
      "date": "YYYY-MM-DD",
-     "url": "<target>",
+     "compiler": "clang++ 17 / g++ 14",
+     "platform": "linux-x86_64",
      "healthScore": N,
      "issues": [{ "id": "ISSUE-001", "title": "...", "severity": "...", "category": "..." }],
-     "categoryScores": { "console": N, "links": N, ... }
+     "categoryScores": { "build": N, "tests": N, "static_analysis": N, "memory": N }
    }
    ```
-
-**Regression mode:** After writing the report, load the baseline file. Compare:
-- Health score delta
-- Issues fixed (in baseline but not current)
-- New issues (in current but not baseline)
-- Append the regression section to the report
 
 ---
 
@@ -574,82 +585,79 @@ $B snapshot -i -a -o "$REPORT_DIR/screenshots/issue-002.png"
 
 Compute each category score (0-100), then take the weighted average.
 
-### Console (weight: 15%)
-- 0 errors → 100
-- 1-3 errors → 70
-- 4-10 errors → 40
-- 10+ errors → 10
+### Build (weight: 25%)
+- 0 errors, 0 warnings → 100
+- 0 errors, 1-5 warnings → 80
+- 0 errors, 6-20 warnings → 60
+- 0 errors, 20+ warnings → 40
+- Any errors → 0
 
-### Links (weight: 10%)
-- 0 broken → 100
-- Each broken link → -15 (minimum 0)
+### Tests (weight: 35%)
+- All pass → 100
+- 1-2 failures → 60
+- 3-10 failures → 30
+- 10+ failures or segfault → 0
 
-### Per-Category Scoring (Visual, Functional, UX, Content, Performance, Accessibility)
-Each category starts at 100. Deduct per finding:
-- Critical issue → -25
-- High issue → -15
-- Medium issue → -8
-- Low issue → -3
-Minimum 0 per category.
+### Static Analysis (weight: 20%)
+- 0 findings → 100
+- 1-3 findings → 70
+- 4-10 findings → 40
+- 10+ findings → 10
+
+### Memory Safety (weight: 20%)
+- No leaks, no errors → 100
+- Reachable leaks only → 70
+- Definite leaks or use-after-free → 20
+- Buffer overflow or double-free → 0
 
 ### Weights
+
 | Category | Weight |
 |----------|--------|
-| Console | 15% |
-| Links | 10% |
-| Visual | 10% |
-| Functional | 20% |
-| UX | 15% |
-| Performance | 10% |
-| Content | 5% |
-| Accessibility | 15% |
+| Build | 25% |
+| Tests | 35% |
+| Static Analysis | 20% |
+| Memory Safety | 20% |
 
 ### Final Score
 `score = Σ (category_score × weight)`
 
 ---
 
-## Framework-Specific Guidance
+## Project-Type Guidance
 
-### Next.js
-- Check console for hydration errors (`Hydration failed`, `Text content did not match`)
-- Monitor `_next/data` requests in network — 404s indicate broken data fetching
-- Test client-side navigation (click links, don't just `goto`) — catches routing issues
-- Check for CLS (Cumulative Layout Shift) on pages with dynamic content
+### Embedded / Bare-metal
+- Check for dynamic memory allocation in ISR context (flag as critical)
+- Verify stack usage estimates (`-fstack-usage` flag or manual analysis)
+- Check for blocking operations (sleep, mutex lock) in interrupt handlers
+- Verify volatile on hardware register accesses and shared ISR data
+- Check for missing memory barriers (`__DSB`, `__DMB` on ARM)
+- Cross-compilation: ensure tests run on simulator or target hardware, not host
 
-### Rails
-- Check for N+1 query warnings in console (if development mode)
-- Verify CSRF token presence in forms
-- Test Turbo/Stimulus integration — do page transitions work smoothly?
-- Check for flash messages appearing and dismissing correctly
+### Server / Daemon
+- Thread safety: check for data races (run with ThreadSanitizer: `-fsanitize=thread`)
+- Check for blocking operations in event-loop callbacks
+- Check for unbounded memory growth (caches without eviction, growing queues)
+- Check for proper signal handling (`SIGPIPE`, `SIGTERM`, `SIGHUP`)
+- Check for file descriptor leaks
 
-### WordPress
-- Check for plugin conflicts (JS errors from different plugins)
-- Verify admin bar visibility for logged-in users
-- Test REST API endpoints (`/wp-json/`)
-- Check for mixed content warnings (common with WP)
-
-### General SPA (React, Vue, Angular)
-- Use `snapshot -i` for navigation — `links` command misses client-side routes
-- Check for stale state (navigate away and back — does data refresh?)
-- Test browser back/forward — does the app handle history correctly?
-- Check for memory leaks (monitor console after extended use)
+### Application / Library
+- Check public API stability (no ABI-breaking changes without version bump)
+- Verify header-only code compiles cleanly across C++14/17/20 (if claimed)
+- Check for ODR violations (multiple translation units defining same symbol)
 
 ---
 
 ## Important Rules
 
-1. **Repro is everything.** Every issue needs at least one screenshot. No exceptions.
-2. **Verify before documenting.** Retry the issue once to confirm it's reproducible, not a fluke.
-3. **Never include credentials.** Write `[REDACTED]` for passwords in repro steps.
-4. **Write incrementally.** Append each issue to the report as you find it. Don't batch.
-5. **Never read source code.** Test as a user, not a developer.
-6. **Check console after every interaction.** JS errors that don't surface visually are still bugs.
-7. **Test like a user.** Use realistic data. Walk through complete workflows end-to-end.
-8. **Depth over breadth.** 5-10 well-documented issues with evidence > 20 vague descriptions.
-9. **Never delete output files.** Screenshots and reports accumulate — that's intentional.
-10. **Use `snapshot -C` for tricky UIs.** Finds clickable divs that the accessibility tree misses.
-11. **Show screenshots to the user.** After every `$B screenshot`, `$B snapshot -a -o`, or `$B responsive` command, use the Read tool on the output file(s) so the user can see them inline. For `responsive` (3 files), Read all three. This is critical — without it, screenshots are invisible to the user.
+1. **Build errors block everything.** If it doesn't compile, nothing else matters.
+2. **Memory errors are critical.** Any ASAN/valgrind error is high or critical severity.
+3. **Never skip static analysis.** clang-tidy catches real bugs, not just style.
+4. **Test failures are not suggestions.** A failing test is a bug report.
+5. **Write incrementally.** Append each issue to the report as you find it. Don't batch.
+6. **Platform matters.** Note the compiler, platform, and build flags in every report.
+7. **Depth over breadth.** 5-10 well-documented issues > 20 vague observations.
+8. **Never delete output files.** Build logs and reports accumulate — that's intentional.
 
 Record baseline health score at end of Phase 6.
 
@@ -658,19 +666,38 @@ Record baseline health score at end of Phase 6.
 ## Output Structure
 
 ```
-.gstack/qa-reports/
-├── qa-report-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
-│   ├── initial.png                        # Landing page annotated screenshot
-│   ├── issue-001-step-1.png               # Per-issue evidence
-│   ├── issue-001-result.png
-│   ├── issue-001-before.png               # Before fix (if fixed)
-│   ├── issue-001-after.png                # After fix (if fixed)
-│   └── ...
-└── baseline.json                          # For regression mode
+.gstackplusplus/qa-reports/
+├── qa-report-{project}-{YYYY-MM-DD}.md   # Structured report
+├── build.log                             # Compiler output
+├── test.log                              # Test runner output
+├── clang-tidy.log                        # Static analysis output
+├── asan.log                              # AddressSanitizer output
+├── valgrind.xml                          # Valgrind XML output (if used)
+└── baseline.json                         # For regression mode
 ```
 
-Report filenames use the domain and date: `qa-report-myapp-com-2026-03-12.md`
+Report filenames use the project name and date: `qa-report-myproject-2026-03-12.md`
+
+---
+
+## Design Principles: KISS · DRY · SOLID · YAGNI
+
+Apply these four principles throughout all analysis, recommendations, and fixes.
+They are listed in priority order — when they conflict, prefer the earlier one.
+
+| Principle | Priority | What it means in C++ | Watch for |
+|-----------|----------|----------------------|-----------|
+| **YAGNI** — You Ain't Gonna Need It | 1 (highest) | Build for today's requirements. No template parameters for hypothetical future types, no virtual methods before you have two concrete implementations, no generalization beyond the current use case. | Template type params with one instantiation, virtual methods with one override, `// will be useful when…` comments, policy classes with no alternate policy |
+| **KISS** — Keep It Simple | 2 | Prefer the simplest solution that works. No clever metaprogramming when a plain function suffices. Write for the engineer debugging at 3 am. | Multi-level template specialisations for a single case, SFINAE chains that could be `if constexpr`, `auto`-everything obscuring types, "clever" one-liners that need a comment to explain themselves |
+| **DRY** — Don't Repeat Yourself | 3 | Every piece of knowledge has one authoritative home. Factor repeated logic into shared helpers, base classes, or macros of last resort. | Same algorithm in two files, copy-pasted error-handling blocks, duplicated constants, parallel `switch` statements that must always change together |
+| **SOLID** | 4 | **S**ingle Responsibility · **O**pen/Closed · **L**iskov Substitution · **I**nterface Segregation · **D**ependency Inversion. Each class does one thing; extend by addition not modification; subtypes are drop-in replacements; interfaces are minimal; dependencies are injected not hard-coded. | God classes/files, `if (type == X)` dispatch that should be virtual, non-substitutable subclasses that override preconditions, fat interfaces with unrelated methods, singletons and global state that make testing impossible |
+
+### Principle interactions in practice
+
+- Favour **YAGNI over SOLID**: don't introduce an interface abstraction until you have two concrete implementations. One implementation = no interface needed yet.
+- Favour **KISS over DRY**: a small, clear duplication is better than a clever abstraction that obscures intent. Abstract when the duplication hurts, not as soon as you see two similar lines.
+- **DRY is not about lines of code** — it is about knowledge. Two functions that happen to look similar but represent independent business rules should stay separate.
+- **SOLID's D (Dependency Inversion) enables testing**: if a component is hard to test in isolation, the fix is usually to inject the dependency rather than to mock globals.
 
 ---
 
@@ -705,6 +732,8 @@ For each fixable issue, in severity order:
 - Read the source code, understand the context
 - Make the **minimal fix** — smallest change that resolves the issue
 - Do NOT refactor surrounding code, add features, or "improve" unrelated things
+- Apply YAGNI: fix only what is broken; do not add generality that isn't needed yet
+- Apply KISS: prefer the simplest correct fix over the "elegant" one
 
 ### 8c. Commit
 
@@ -718,16 +747,16 @@ git commit -m "fix(qa): ISSUE-NNN — short description"
 
 ### 8d. Re-test
 
-- Navigate back to the affected page
-- Take **before/after screenshot pair**
-- Check console for errors
-- Use `snapshot -D` to verify the change had the expected effect
+- Rebuild the affected target
+- Re-run the relevant tests
+- Re-run sanitizers on the fixed code
+- Verify the issue no longer reproduces
 
 ```bash
-$B goto <affected-url>
-$B screenshot "$REPORT_DIR/screenshots/issue-NNN-after.png"
-$B console --errors
-$B snapshot -D
+cmake --build $BUILD_DIR --target <affected-target> 2>&1
+ctest --test-dir $BUILD_DIR -R "<test-pattern>" -V 2>&1
+# Re-run under ASan if the fix was memory-related
+ASAN_OPTIONS=halt_on_error=0 <test-binary> 2>&1
 ```
 
 ### 8e. Classify
@@ -763,7 +792,7 @@ The test MUST:
   ```
   // Regression: ISSUE-NNN — {what broke}
   // Found by /qa on {YYYY-MM-DD}
-  // Report: .gstack/qa-reports/qa-report-{domain}-{date}.md
+  // Report: .gstackplusplus/qa-reports/qa-report-{domain}-{date}.md
   ```
 
 Test type decision:
@@ -823,14 +852,14 @@ After all fixes are applied:
 
 Write the report to both local and project-scoped locations:
 
-**Local:** `.gstack/qa-reports/qa-report-{domain}-{YYYY-MM-DD}.md`
+**Local:** `.gstackplusplus/qa-reports/qa-report-{domain}-{YYYY-MM-DD}.md`
 
 **Project-scoped:** Write test outcome artifact for cross-session context:
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
+Write to `~/.gstackplusplus/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
 
 **Per-issue additions** (beyond standard report template):
 - Fix Status: verified / best-effort / reverted / deferred
@@ -845,7 +874,7 @@ Write to `~/.gstack/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
 - Health score delta: baseline → final
 
 **PR Summary:** Include a one-line summary suitable for PR descriptions:
-> "QA found N issues, fixed M, health score X → Y."
+> "QA found N issues, fixed M (build: X, tests: Y, ASan: Z, static analysis: W), health score X → Y."
 
 ---
 

@@ -2,7 +2,7 @@
  * Eval result persistence and comparison.
  *
  * EvalCollector accumulates test results, writes them to
- * ~/.gstack-dev/evals/{version}-{branch}-{tier}-{timestamp}.json,
+ * ~/.gstackplusplus-dev/evals/{version}-{branch}-{tier}-{timestamp}.json,
  * prints a summary table, and auto-compares with the previous run.
  *
  * Comparison functions are exported for reuse by the eval:compare CLI.
@@ -14,7 +14,7 @@ import * as os from 'os';
 import { spawnSync } from 'child_process';
 
 const SCHEMA_VERSION = 1;
-const DEFAULT_EVAL_DIR = path.join(os.homedir(), '.gstack-dev', 'evals');
+const DEFAULT_EVAL_DIR = path.join(os.homedir(), '.gstackplusplus-dev', 'evals');
 
 // --- Interfaces ---
 

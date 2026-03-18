@@ -1,0 +1,229 @@
+---
+name: codex
+version: 1.0.0
+description: |
+  Configure gstack++ for OpenAI Codex (codex-1 / o3-based autonomous agent). Adapts
+  gstack++ workflows for autonomous terminal execution, no-interaction mode, and
+  Codex-specific tool availability. Run this once per project to set model_mode=codex
+  in ~/.gstackplusplus/config. All subsequent gstack++ skills will auto-adapt.
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+
+---
+<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
+<!-- Regenerate: bun run gen:skill-docs -->
+
+# gstack++ × Codex: Configuration & Adaptation Guide
+
+This skill configures gstack++ for use with **OpenAI Codex** (codex-1, the o3-based
+autonomous coding agent). Codex runs in an isolated sandbox with terminal access,
+executes autonomously without pausing for confirmation, and uses different tool
+primitives than Claude Code. This skill bridges the gap.
+
+---
+
+## Step 1: Detect environment
+
+```bash
+# Detect toolchain availability
+command -v cmake 2>/dev/null && echo "CMAKE:ok" || echo "CMAKE:missing"
+command -v clang++ 2>/dev/null || command -v g++ 2>/dev/null && echo "CXX:ok" || echo "CXX:missing"
+command -v ctest 2>/dev/null && echo "CTEST:ok" || echo "CTEST:missing"
+command -v clang-tidy 2>/dev/null && echo "CLANG_TIDY:ok" || echo "CLANG_TIDY:missing"
+# Check build system
+[ -f CMakeLists.txt ] && echo "BUILD:cmake"
+[ -f Makefile ] && echo "BUILD:make"
+[ -f meson.build ] && echo "BUILD:meson"
+```
+
+## Step 2: Write model configuration
+
+```bash
+mkdir -p ~/.gstackplusplus
+~/.claude/skills/gstackplusplus/bin/gstackplusplus-config set model_mode codex 2>/dev/null || \
+  echo 'model_mode: codex' >> ~/.gstackplusplus/config.yaml
+echo "gstack++ model_mode set to: codex"
+```
+
+## Step 3: Write CLAUDE.md snippet
+
+Write this to the project's `CLAUDE.md` under a `## gstack++ (Codex)` section:
+
+```markdown
+## gstack++ (Codex mode)
+
+Model: codex-1 (autonomous agent, no interactive prompts)
+Available skills: /plan-eng-review, /review, /ship, /qa, /qa-only, /design-review, /retro
+
+### Codex adaptations in effect:
+
+**No AskUserQuestion.** Codex runs autonomously. All gstack++ skills will:
+- Never pause for confirmation — choose the safer option and log the decision
+- Default to the complete implementation (Boil the Lake — always choose completeness)
+- Emit structured JSON decisions when a choice is made: `{"decision":"<choice>","reason":"<why>"}`
+- Proceed without asking when risk < 20% (qa heuristic) or design fix risk < 20%
+
+**No browser tools.** `/browse` and `/setup-browser-cookies` are disabled.
+`/qa` runs build → ctest → clang-tidy → sanitizers only (no browser QA).
+
+**Commit strategy.** Every fix is committed atomically with machine-readable messages:
+`fix(codex): ISSUE-NNN — <description>` with `Co-Authored-By: Codex <noreply@openai.com>`
+
+**Output format.** All skill reports are written to `.gstackplusplus/` directory as Markdown.
+No interactive display — output is file-based and picked up by CI or the caller.
+
+**Hard stop conditions.** Codex will stop and write `.gstackplusplus/BLOCKED.md` if:
+- WTF-likelihood > 40% (double the normal 20% threshold, since no human checkpoints)
+- More than 3 reverts in a single session
+- Any test failure that cannot be root-caused from source code alone
+- A change would touch > 15 files (too broad for autonomous operation)
+```
+
+
+---
+
+## Design Principles: KISS · DRY · SOLID · YAGNI
+
+Apply these four principles throughout all analysis, recommendations, and fixes.
+They are listed in priority order — when they conflict, prefer the earlier one.
+
+| Principle | Priority | What it means in C++ | Watch for |
+|-----------|----------|----------------------|-----------|
+| **YAGNI** — You Ain't Gonna Need It | 1 (highest) | Build for today's requirements. No template parameters for hypothetical future types, no virtual methods before you have two concrete implementations, no generalization beyond the current use case. | Template type params with one instantiation, virtual methods with one override, `// will be useful when…` comments, policy classes with no alternate policy |
+| **KISS** — Keep It Simple | 2 | Prefer the simplest solution that works. No clever metaprogramming when a plain function suffices. Write for the engineer debugging at 3 am. | Multi-level template specialisations for a single case, SFINAE chains that could be `if constexpr`, `auto`-everything obscuring types, "clever" one-liners that need a comment to explain themselves |
+| **DRY** — Don't Repeat Yourself | 3 | Every piece of knowledge has one authoritative home. Factor repeated logic into shared helpers, base classes, or macros of last resort. | Same algorithm in two files, copy-pasted error-handling blocks, duplicated constants, parallel `switch` statements that must always change together |
+| **SOLID** | 4 | **S**ingle Responsibility · **O**pen/Closed · **L**iskov Substitution · **I**nterface Segregation · **D**ependency Inversion. Each class does one thing; extend by addition not modification; subtypes are drop-in replacements; interfaces are minimal; dependencies are injected not hard-coded. | God classes/files, `if (type == X)` dispatch that should be virtual, non-substitutable subclasses that override preconditions, fat interfaces with unrelated methods, singletons and global state that make testing impossible |
+
+### Principle interactions in practice
+
+- Favour **YAGNI over SOLID**: don't introduce an interface abstraction until you have two concrete implementations. One implementation = no interface needed yet.
+- Favour **KISS over DRY**: a small, clear duplication is better than a clever abstraction that obscures intent. Abstract when the duplication hurts, not as soon as you see two similar lines.
+- **DRY is not about lines of code** — it is about knowledge. Two functions that happen to look similar but represent independent business rules should stay separate.
+- **SOLID's D (Dependency Inversion) enables testing**: if a component is hard to test in isolation, the fix is usually to inject the dependency rather than to mock globals.
+
+---
+
+## Codex-Specific Behavioral Rules
+
+These rules apply to ALL gstack++ skills when `model_mode=codex` is set:
+
+### 1. Never pause for confirmation
+
+Codex runs to completion. When a skill would normally call `AskUserQuestion`:
+- Pick the **safer and more complete** option (prefer completeness over speed)
+- Log the decision in a structured format at the current step
+- Continue the workflow
+
+### 2. Autonomous decision log
+
+Every decision that would have been an `AskUserQuestion` is written to:
+`.gstackplusplus/codex-decisions-{YYYY-MM-DD}.md`
+
+Format:
+```
+## Decision: {FINDING-NNN or ISSUE-NNN}
+- **Context:** {one sentence}
+- **Options considered:** {A}, {B}
+- **Chose:** {A}
+- **Reason:** {one sentence — why this option is safer/more complete}
+- **Completeness:** {X}/10
+```
+
+### 3. Build-first discipline
+
+Before any fix, verify the project builds clean:
+```bash
+cmake --build $BUILD_DIR --parallel $(nproc 2>/dev/null || echo 4) 2>&1
+```
+If the build is already broken, **stop and write a blocker** — don't layer fixes on a broken baseline.
+
+### 4. Regression guard
+
+After every fix:
+```bash
+ctest --test-dir $BUILD_DIR --output-on-failure -j$(nproc 2>/dev/null || echo 4) 2>&1
+```
+If new test failures appear → `git revert HEAD` immediately. Never leave the test suite in a worse state.
+
+### 5. Hard-cap everything
+
+- Max fixes per session: **30** (lower than the Claude default of 50 — no human checkpoint)
+- Max files touched per fix: **5** (raises alarm at 3+, hard stop at 5)
+- Max commits per session: **50**
+- Max session wall time: write `.gstackplusplus/BLOCKED.md` with reason if a single task takes >2 hours
+
+### 6. Output artifacts
+
+Every skill run writes to `.gstackplusplus/`:
+- `codex-run-{YYYY-MM-DD-HHMMSS}.md` — full run report
+- `codex-decisions-{YYYY-MM-DD}.md` — all decisions made
+- `BLOCKED.md` — if stopped mid-run (reason + last commit SHA)
+
+---
+
+## Skills and Codex Compatibility
+
+| Skill | Codex compatible? | Notes |
+|-------|------------------|-------|
+| `/plan-ceo-review` | ⚠️ Limited | Use only if repo context is fully available; no interactive expansion |
+| `/plan-eng-review` | ✅ Full | All sections run; decisions logged instead of asked |
+| `/plan-design-review` | ✅ Full | Report only — no interaction needed |
+| `/review` | ✅ Full | Auto-fix mode; no interactive ASK — all fixes auto-applied |
+| `/ship` | ✅ Full | Fully autonomous; pushes and opens PR |
+| `/qa` | ✅ Full | Build+test+sanitizer loop; no browser tests |
+| `/qa-only` | ✅ Full | Report only; no fixes |
+| `/design-review` | ✅ Full | Fix loop runs fully; decisions logged |
+| `/retro` | ✅ Full | Stats only; no interaction needed |
+| `/document-release` | ✅ Full | Reads diff, updates docs |
+| `/browse` | ❌ Disabled | No browser in Codex sandbox |
+| `/setup-browser-cookies` | ❌ Disabled | No browser in Codex sandbox |
+
+---
+
+## Codex Preamble (substitute for PREAMBLE placeholder in Codex sessions)
+
+When running gstack++ skills under Codex, use this lightweight preamble instead of
+the standard one (which includes interactive upgrade prompts and AskUserQuestion):
+
+```bash
+# Codex gstack++ preamble — lightweight, no interaction
+mkdir -p ~/.gstackplusplus/sessions
+touch ~/.gstackplusplus/sessions/"$$"
+_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+echo "BRANCH: $_BRANCH"
+echo "MODEL_MODE: codex"
+echo "AUTONOMOUS: true"
+```
+
+No upgrade prompts. No lake intro. All decisions logged, none interactive.
+
+---
+
+## Quick-start: first run checklist
+
+After setting up Codex mode, verify the toolchain and run a smoke test:
+
+```bash
+# 1. Verify cmake builds clean
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
+cmake --build build --parallel && \
+echo "BUILD: OK"
+
+# 2. Verify tests pass
+ctest --test-dir build --output-on-failure && echo "TESTS: OK"
+
+# 3. Verify sanitizer build works
+cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -g" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" && \
+cmake --build build-asan --parallel && \
+echo "ASAN BUILD: OK"
+
+# 4. Write session marker
+mkdir -p .gstackplusplus && echo "codex_mode_active: true" > .gstackplusplus/session-config.yaml
+echo "gstack++ Codex mode ready"
+```
+
+If any step fails, write a diagnostic to `.gstackplusplus/setup-failure.md` with the error and exit.

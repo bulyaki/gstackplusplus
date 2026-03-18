@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * List eval runs from ~/.gstack-dev/evals/
+ * List eval runs from ~/.gstackplusplus-dev/evals/
  *
  * Usage: bun run eval:list [--branch <name>] [--tier e2e|llm-judge] [--limit N]
  */
@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
-const EVAL_DIR = path.join(os.homedir(), '.gstack-dev', 'evals');
+const EVAL_DIR = path.join(os.homedir(), '.gstackplusplus-dev', 'evals');
 
 // Parse args
 const args = process.argv.slice(2);

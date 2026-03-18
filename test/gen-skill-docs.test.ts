@@ -8,7 +8,7 @@ const ROOT = path.resolve(import.meta.dir, '..');
 
 describe('gen-skill-docs', () => {
   test('generated SKILL.md contains all command categories', () => {
-    const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
+    const content = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md'), 'utf-8');
     const categories = new Set(Object.values(COMMAND_DESCRIPTIONS).map(d => d.category));
     for (const cat of categories) {
       expect(content).toContain(`### ${cat}`);
@@ -16,7 +16,7 @@ describe('gen-skill-docs', () => {
   });
 
   test('generated SKILL.md contains all commands', () => {
-    const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
+    const content = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md'), 'utf-8');
     for (const [cmd, meta] of Object.entries(COMMAND_DESCRIPTIONS)) {
       const display = meta.usage || cmd;
       expect(content).toContain(display);
@@ -24,7 +24,7 @@ describe('gen-skill-docs', () => {
   });
 
   test('command table is sorted alphabetically within categories', () => {
-    const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
+    const content = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md'), 'utf-8');
     // Extract command names from the Navigation section as a test
     const navSection = content.match(/### Navigation\n\|.*\n\|.*\n([\s\S]*?)(?=\n###|\n## )/);
     expect(navSection).not.toBeNull();
@@ -49,7 +49,7 @@ describe('gen-skill-docs', () => {
   });
 
   test('snapshot flags section contains all flags', () => {
-    const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
+    const content = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md'), 'utf-8');
     for (const flag of SNAPSHOT_FLAGS) {
       expect(content).toContain(flag.short);
       expect(content).toContain(flag.description);
@@ -58,7 +58,7 @@ describe('gen-skill-docs', () => {
 
   // All skills that must have templates — single source of truth
   const ALL_SKILLS = [
-    { dir: '.', name: 'root gstack' },
+    { dir: '.', name: 'root gstack++' },
     { dir: 'browse', name: 'browse' },
     { dir: 'qa', name: 'qa' },
     { dir: 'qa-only', name: 'qa-only' },
@@ -68,10 +68,17 @@ describe('gen-skill-docs', () => {
     { dir: 'plan-eng-review', name: 'plan-eng-review' },
     { dir: 'retro', name: 'retro' },
     { dir: 'setup-browser-cookies', name: 'setup-browser-cookies' },
-    { dir: 'gstack-upgrade', name: 'gstack-upgrade' },
+    { dir: 'gstackplusplus-upgrade', name: 'gstackplusplus-upgrade' },
     { dir: 'plan-design-review', name: 'plan-design-review' },
     { dir: 'design-review', name: 'design-review' },
     { dir: 'design-consultation', name: 'design-consultation' },
+    { dir: 'document-release', name: 'document-release' },
+    { dir: 'claude', name: 'claude' },
+    { dir: 'codex', name: 'codex' },
+    { dir: 'qwen', name: 'qwen' },
+    { dir: 'antigravity', name: 'antigravity' },
+    { dir: 'cursor', name: 'cursor' },
+    { dir: 'copilot', name: 'copilot' },
   ];
 
   test('every skill has a SKILL.md.tmpl template', () => {
@@ -125,11 +132,12 @@ describe('gen-skill-docs', () => {
   });
 
   test('templates contain placeholders', () => {
+    // Root SKILL.md.tmpl is the C++ toolchain skill — uses PREAMBLE and BROWSE_SETUP
     const rootTmpl = fs.readFileSync(path.join(ROOT, 'SKILL.md.tmpl'), 'utf-8');
-    expect(rootTmpl).toContain('{{COMMAND_REFERENCE}}');
-    expect(rootTmpl).toContain('{{SNAPSHOT_FLAGS}}');
     expect(rootTmpl).toContain('{{PREAMBLE}}');
+    expect(rootTmpl).toContain('{{BROWSE_SETUP}}');
 
+    // Browse SKILL.md.tmpl contains the command reference and snapshot flags
     const browseTmpl = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md.tmpl'), 'utf-8');
     expect(browseTmpl).toContain('{{COMMAND_REFERENCE}}');
     expect(browseTmpl).toContain('{{SNAPSHOT_FLAGS}}');
@@ -139,7 +147,7 @@ describe('gen-skill-docs', () => {
   test('generated SKILL.md contains contributor mode check', () => {
     const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
     expect(content).toContain('Contributor Mode');
-    expect(content).toContain('gstack_contributor');
+    expect(content).toContain('gstackplusplus_contributor');
     expect(content).toContain('contributor-logs');
   });
 
@@ -176,10 +184,6 @@ describe('gen-skill-docs', () => {
     // Both should contain the health score rubric
     expect(qaContent).toContain('Health Score Rubric');
     expect(qaOnlyContent).toContain('Health Score Rubric');
-
-    // Both should contain framework guidance
-    expect(qaContent).toContain('Framework-Specific Guidance');
-    expect(qaOnlyContent).toContain('Framework-Specific Guidance');
 
     // Both should contain the important rules
     expect(qaContent).toContain('Important Rules');
@@ -248,7 +252,7 @@ describe('BASE_BRANCH_DETECT resolver', () => {
 describe('description quality evals', () => {
   // Regression: snapshot flags lost value hints (-d <N>, -s <sel>, -o <path>)
   test('snapshot flags with values include value hints in output', () => {
-    const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
+    const content = fs.readFileSync(path.join(ROOT, 'browse', 'SKILL.md'), 'utf-8');
     for (const flag of SNAPSHOT_FLAGS) {
       if (flag.takesValue) {
         expect(flag.valueHint).toBeDefined();
@@ -313,13 +317,20 @@ describe('description quality evals', () => {
     }
   });
 
-  // Guard: generated output uses → not ->
+  // Guard: generated output uses → not ->  (check Tips section of root C++ skill)
   test('generated SKILL.md uses unicode arrows', () => {
     const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
-    // Check the Tips section specifically (where we regressed -> from →)
-    const tipsSection = content.slice(content.indexOf('## Tips'));
+    // Check the Tips section — C++ triage tips use → for flow descriptions
+    const tipsIdx = content.indexOf('## Tips');
+    expect(tipsIdx).toBeGreaterThanOrEqual(0);
+    const tipsSection = content.slice(tipsIdx);
     expect(tipsSection).toContain('→');
-    expect(tipsSection).not.toContain('->');
+    // Tips prose should not use ASCII arrow (C++ code blocks may use ->)
+    // Only check lines that are not inside code fences
+    const tipLines = tipsSection.split('\n').filter(l => !l.startsWith('`') && !l.startsWith('    '));
+    for (const line of tipLines) {
+      expect(line).not.toContain('->');
+    }
   });
 });
 

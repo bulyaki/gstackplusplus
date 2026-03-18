@@ -1,11 +1,12 @@
 ---
 name: qa-only
-version: 1.0.0
+version: 2.0.0
 description: |
-  Report-only QA testing. Systematically tests a web application and produces a
-  structured report with health score, screenshots, and repro steps — but never
-  fixes anything. Use when asked to "just report bugs", "qa report only", or
-  "test but don't fix". For the full test-fix-verify loop, use /qa instead.
+  Report-only QA for C++ applications, servers, and embedded projects. Builds the project,
+  runs tests, runs static analysis, runs memory checkers — then produces a structured report
+  with health score and repro steps but never fixes anything. Use when asked to "just report
+  bugs", "qa report only", or "test but don't fix". For the full build-test-fix-verify loop,
+  use /qa instead.
 allowed-tools:
   - Bash
   - Read
@@ -17,7 +18,7 @@ allowed-tools:
 
 # /qa-only: Report-Only QA Testing
 
-You are a QA engineer. Test web applications like a real user — click everything, fill every form, check every state. Produce a structured report with evidence. **NEVER fix anything.**
+You are a QA engineer. Test C++ projects like a real engineer — build with warnings enabled, run all tests, run static analysis, check memory safety. Produce a structured report with evidence. **NEVER fix anything.**
 
 ## Setup
 
@@ -25,23 +26,24 @@ You are a QA engineer. Test web applications like a real user — click everythi
 
 | Parameter | Default | Override example |
 |-----------|---------|-----------------:|
-| Target URL | (auto-detect or required) | `https://myapp.com`, `http://localhost:3000` |
-| Mode | full | `--quick`, `--regression .gstack/qa-reports/baseline.json` |
-| Output dir | `.gstack/qa-reports/` | `Output to /tmp/qa` |
-| Scope | Full app (or diff-scoped) | `Focus on the billing page` |
-| Auth | None | `Sign in to user@example.com`, `Import cookies from cookies.json` |
+| Target | (auto-detect from CMakeLists.txt) | `build/my_binary`, `--target my_lib` |
+| Tier | Standard | `--quick`, `--exhaustive` |
+| Mode | full | `--regression .gstackplusplus/qa-reports/baseline.json` |
+| Output dir | `.gstackplusplus/qa-reports/` | `Output to /tmp/qa` |
+| Scope | Full project (or diff-scoped) | `Focus on the network module` |
+| Sanitizers | ASan+UBSan | `--no-sanitizers`, `--tsan` (ThreadSanitizer) |
 
-**If no URL is given and you're on a feature branch:** Automatically enter **diff-aware mode** (see Modes below). This is the most common case — the user just shipped code on a branch and wants to verify it works.
+**If no target is given and you're on a feature branch:** Automatically enter **diff-aware mode** — scope to files changed vs. the base branch.
 
-**Find the browse binary:**
+**Check C++ toolchain:**
 
 {{BROWSE_SETUP}}
 
 **Create output directories:**
 
 ```bash
-REPORT_DIR=".gstack/qa-reports"
-mkdir -p "$REPORT_DIR/screenshots"
+REPORT_DIR=".gstackplusplus/qa-reports"
+mkdir -p "$REPORT_DIR"
 ```
 
 ---
@@ -50,10 +52,10 @@ mkdir -p "$REPORT_DIR/screenshots"
 
 Before falling back to git diff heuristics, check for richer test plan sources:
 
-1. **Project-scoped test plans:** Check `~/.gstack/projects/` for recent `*-test-plan-*.md` files for this repo
+1. **Project-scoped test plans:** Check `~/.gstackplusplus/projects/` for recent `*-test-plan-*.md` files for this repo
    ```bash
-   eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-   ls -t ~/.gstack/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
+   eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+   ls -t ~/.gstackplusplus/projects/$SLUG/*-test-plan-*.md 2>/dev/null | head -1
    ```
 2. **Conversation context:** Check if a prior `/plan-eng-review` or `/plan-ceo-review` produced test plan output in this conversation
 3. **Use whichever source is richer.** Fall back to git diff analysis only if neither is available.
@@ -68,33 +70,33 @@ Before falling back to git diff heuristics, check for richer test plan sources:
 
 Write the report to both local and project-scoped locations:
 
-**Local:** `.gstack/qa-reports/qa-report-{domain}-{YYYY-MM-DD}.md`
+**Local:** `.gstackplusplus/qa-reports/qa-report-{project}-{YYYY-MM-DD}.md`
 
 **Project-scoped:** Write test outcome artifact for cross-session context:
 ```bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
 ```
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
+Write to `~/.gstackplusplus/projects/{slug}/{user}-{branch}-test-outcome-{datetime}.md`
 
 ### Output Structure
 
 ```
-.gstack/qa-reports/
-├── qa-report-{domain}-{YYYY-MM-DD}.md    # Structured report
-├── screenshots/
-│   ├── initial.png                        # Landing page annotated screenshot
-│   ├── issue-001-step-1.png               # Per-issue evidence
-│   ├── issue-001-result.png
-│   └── ...
+.gstackplusplus/qa-reports/
+├── qa-report-{project}-{YYYY-MM-DD}.md    # Structured report
+├── build.log                              # Compiler output with warnings
+├── test.log                               # Test runner output
+├── clang-tidy.log                         # Static analysis output
+├── asan.log                               # AddressSanitizer output
+├── valgrind.xml                           # Valgrind XML output (if used)
 └── baseline.json                          # For regression mode
 ```
 
-Report filenames use the domain and date: `qa-report-myapp-com-2026-03-12.md`
+Report filenames use the project name and date: `qa-report-myproject-2026-03-12.md`
 
 ---
 
 ## Additional Rules (qa-only specific)
 
-11. **Never fix bugs.** Find and document only. Do not read source code, edit files, or suggest fixes in the report. Your job is to report what's broken, not to fix it. Use `/qa` for the test-fix-verify loop.
-12. **No test framework detected?** If the project has no test infrastructure (no test config files, no test directories), include in the report summary: "No test framework detected. Run `/qa` to bootstrap one and enable regression test generation."
+11. **Never fix bugs.** Find and document only. Do not edit source files or suggest inline fixes in the report. Your job is to report what's broken with repro steps — use `/qa` for the build-test-fix-verify loop.
+12. **No test framework detected?** If the project has no test infrastructure (no CMakeLists.txt test targets, no test directories), include in the report summary: "No test framework detected. Run `/qa` to bootstrap one and enable regression test generation."

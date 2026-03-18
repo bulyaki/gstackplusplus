@@ -1,6 +1,6 @@
 # Browser — technical details
 
-This document covers the command reference and internals of gstack's headless browser.
+This document covers the command reference and internals of gstack++'s headless browser.
 
 ## Command reference
 
@@ -22,7 +22,7 @@ All selector arguments accept CSS selectors, `@e` refs after `snapshot`, or `@c`
 
 ## How it works
 
-gstack's browser is a compiled CLI binary that talks to a persistent local Chromium daemon over HTTP. The CLI is a thin client — it reads a state file, sends a command, and prints the response to stdout. The server does the real work via [Playwright](https://playwright.dev/).
+gstack++'s browser is a compiled CLI binary that talks to a persistent local Chromium daemon over HTTP. The CLI is a thin client — it reads a state file, sends a command, and prints the response to stdout. The server does the real work via [Playwright](https://playwright.dev/).
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -46,7 +46,7 @@ gstack's browser is a compiled CLI binary that talks to a persistent local Chrom
 
 ### Lifecycle
 
-1. **First call**: CLI checks `.gstack/browse.json` (in the project root) for a running server. None found — it spawns `bun run browse/src/server.ts` in the background. The server launches headless Chromium via Playwright, picks a random port (10000-60000), generates a bearer token, writes the state file, and starts accepting HTTP requests. This takes ~3 seconds.
+1. **First call**: CLI checks `.gstackplusplus/browse.json` (in the project root) for a running server. None found — it spawns `bun run browse/src/server.ts` in the background. The server launches headless Chromium via Playwright, picks a random port (10000-60000), generates a bearer token, writes the state file, and starts accepting HTTP requests. This takes ~3 seconds.
 
 2. **Subsequent calls**: CLI reads the state file, sends an HTTP POST with the bearer token, prints the response. ~100-200ms round trip.
 
@@ -111,15 +111,15 @@ Mutual exclusion: `--clip` + selector and `--viewport` + `--clip` both throw err
 
 ### Authentication
 
-Each server session generates a random UUID as a bearer token. The token is written to the state file (`.gstack/browse.json`) with chmod 600. Every HTTP request must include `Authorization: Bearer <token>`. This prevents other processes on the machine from controlling the browser.
+Each server session generates a random UUID as a bearer token. The token is written to the state file (`.gstackplusplus/browse.json`) with chmod 600. Every HTTP request must include `Authorization: Bearer <token>`. This prevents other processes on the machine from controlling the browser.
 
 ### Console, network, and dialog capture
 
 The server hooks into Playwright's `page.on('console')`, `page.on('response')`, and `page.on('dialog')` events. All entries are kept in O(1) circular buffers (50,000 capacity each) and flushed to disk asynchronously via `Bun.write()`:
 
-- Console: `.gstack/browse-console.log`
-- Network: `.gstack/browse-network.log`
-- Dialog: `.gstack/browse-dialog.log`
+- Console: `.gstackplusplus/browse-console.log`
+- Network: `.gstackplusplus/browse-network.log`
+- Dialog: `.gstackplusplus/browse-dialog.log`
 
 The `console`, `network`, and `dialog` commands read from the in-memory buffers, not disk.
 
@@ -141,12 +141,12 @@ For `eval` files, single-line files return the expression value directly. Multi-
 
 ### Multi-workspace support
 
-Each workspace gets its own isolated browser instance with its own Chromium process, tabs, cookies, and logs. State is stored in `.gstack/` inside the project root (detected via `git rev-parse --show-toplevel`).
+Each workspace gets its own isolated browser instance with its own Chromium process, tabs, cookies, and logs. State is stored in `.gstackplusplus/` inside the project root (detected via `git rev-parse --show-toplevel`).
 
 | Workspace | State file | Port |
 |-----------|------------|------|
-| `/code/project-a` | `/code/project-a/.gstack/browse.json` | random (10000-60000) |
-| `/code/project-b` | `/code/project-b/.gstack/browse.json` | random (10000-60000) |
+| `/code/project-a` | `/code/project-a/.gstackplusplus/browse.json` | random (10000-60000) |
+| `/code/project-b` | `/code/project-b/.gstackplusplus/browse.json` | random (10000-60000) |
 
 No port collisions. No shared state. Each project is fully isolated.
 
@@ -156,7 +156,7 @@ No port collisions. No shared state. Each project is fully isolated.
 |----------|---------|-------------|
 | `BROWSE_PORT` | 0 (random 10000-60000) | Fixed port for the HTTP server (debug override) |
 | `BROWSE_IDLE_TIMEOUT` | 1800000 (30 min) | Idle shutdown timeout in ms |
-| `BROWSE_STATE_FILE` | `.gstack/browse.json` | Path to state file (CLI passes to server) |
+| `BROWSE_STATE_FILE` | `.gstackplusplus/browse.json` | Path to state file (CLI passes to server) |
 | `BROWSE_SERVER_SCRIPT` | auto-detected | Path to server.ts |
 
 ### Performance
@@ -165,9 +165,9 @@ No port collisions. No shared state. Each project is fully isolated.
 |------|-----------|-----------------|--------------------------|
 | Chrome MCP | ~5s | ~2-5s | ~2000 tokens (schema + protocol) |
 | Playwright MCP | ~3s | ~1-3s | ~1500 tokens (schema + protocol) |
-| **gstack browse** | **~3s** | **~100-200ms** | **0 tokens** (plain text stdout) |
+| **gstack++ browse** | **~3s** | **~100-200ms** | **0 tokens** (plain text stdout) |
 
-The context overhead difference compounds fast. In a 20-command browser session, MCP tools burn 30,000-40,000 tokens on protocol framing alone. gstack burns zero.
+The context overhead difference compounds fast. In a 20-command browser session, MCP tools burn 30,000-40,000 tokens on protocol framing alone. gstack++ burns zero.
 
 ### Why CLI over MCP?
 
@@ -177,7 +177,7 @@ MCP (Model Context Protocol) works well for remote services, but for local brows
 - **Connection fragility**: persistent WebSocket/stdio connections drop and fail to reconnect.
 - **Unnecessary abstraction**: Claude Code already has a Bash tool. A CLI that prints to stdout is the simplest possible interface.
 
-gstack skips all of this. Compiled binary. Plain text in, plain text out. No protocol. No schema. No connection management.
+gstack++ skips all of this. Compiled binary. Plain text in, plain text out. No protocol. No schema. No connection management.
 
 ## Acknowledgments
 
@@ -227,7 +227,7 @@ Tests spin up a local HTTP server (`browse/test/test-server.ts`) serving HTML fi
 
 | File | Role |
 |------|------|
-| `browse/src/cli.ts` | Entry point. Reads `.gstack/browse.json`, sends HTTP to the server, prints response. |
+| `browse/src/cli.ts` | Entry point. Reads `.gstackplusplus/browse.json`, sends HTTP to the server, prints response. |
 | `browse/src/server.ts` | Bun HTTP server. Routes commands to the right handler. Manages idle timeout. |
 | `browse/src/browser-manager.ts` | Chromium lifecycle — launch, tab management, ref map, crash detection. |
 | `browse/src/snapshot.ts` | Parses accessibility tree, assigns `@e`/`@c` refs, builds Locator map. Handles `--diff`, `--annotate`, `-C`. |
@@ -241,13 +241,13 @@ Tests spin up a local HTTP server (`browse/test/test-server.ts`) serving HTML fi
 
 ### Deploying to the active skill
 
-The active skill lives at `~/.claude/skills/gstack/`. After making changes:
+The active skill lives at `~/.claude/skills/gstackplusplus/`. After making changes:
 
 1. Push your branch
-2. Pull in the skill directory: `cd ~/.claude/skills/gstack && git pull`
-3. Rebuild: `cd ~/.claude/skills/gstack && bun run build`
+2. Pull in the skill directory: `cd ~/.claude/skills/gstackplusplus && git pull`
+3. Rebuild: `cd ~/.claude/skills/gstackplusplus && bun run build`
 
-Or copy the binary directly: `cp browse/dist/browse ~/.claude/skills/gstack/browse/dist/browse`
+Or copy the binary directly: `cp browse/dist/browse ~/.claude/skills/gstackplusplus/browse/dist/browse`
 
 ### Adding a new command
 

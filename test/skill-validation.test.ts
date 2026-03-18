@@ -9,9 +9,10 @@ const ROOT = path.resolve(import.meta.dir, '..');
 
 describe('SKILL.md command validation', () => {
   test('all $B commands in SKILL.md are valid browse commands', () => {
+    // Root SKILL.md is now a C++ toolchain guide — no $B browser commands expected.
     const result = validateSkill(path.join(ROOT, 'SKILL.md'));
     expect(result.invalid).toHaveLength(0);
-    expect(result.valid.length).toBeGreaterThan(0);
+    // valid.length may be 0 if no $B commands exist (C++ skill has none)
   });
 
   test('all snapshot flags in SKILL.md are valid', () => {
@@ -297,7 +298,7 @@ describe('Cross-skill path consistency', () => {
       const content = fs.readFileSync(filePath, 'utf-8');
 
       const hasBoth = (content.includes('per-project') && content.includes('global')) ||
-        (content.includes('$REMOTE_SLUG/greptile-history') && content.includes('~/.gstack/greptile-history'));
+        (content.includes('$REMOTE_SLUG/greptile-history') && content.includes('~/.gstackplusplus/greptile-history'));
 
       expect(hasBoth).toBe(true);
     }
@@ -306,12 +307,12 @@ describe('Cross-skill path consistency', () => {
   test('greptile-triage.md contains both project and global history paths', () => {
     const content = fs.readFileSync(path.join(ROOT, 'review', 'greptile-triage.md'), 'utf-8');
     expect(content).toContain('$REMOTE_SLUG/greptile-history.md');
-    expect(content).toContain('~/.gstack/greptile-history.md');
+    expect(content).toContain('~/.gstackplusplus/greptile-history.md');
   });
 
   test('retro/SKILL.md reads global greptile-history (not per-project)', () => {
     const content = fs.readFileSync(path.join(ROOT, 'retro', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('~/.gstack/greptile-history.md');
+    expect(content).toContain('~/.gstackplusplus/greptile-history.md');
     // Should NOT reference per-project path for reads
     expect(content).not.toContain('$REMOTE_SLUG/greptile-history.md');
   });
@@ -325,10 +326,10 @@ describe('QA skill structure validation', () => {
   test('qa/SKILL.md has all 11 phases', () => {
     const phases = [
       'Phase 1', 'Initialize',
-      'Phase 2', 'Authenticate',
-      'Phase 3', 'Orient',
-      'Phase 4', 'Explore',
-      'Phase 5', 'Document',
+      'Phase 2', 'Build',
+      'Phase 3', 'Unit Tests',
+      'Phase 4', 'Static Analysis',
+      'Phase 5', 'Memory Analysis',
       'Phase 6', 'Wrap Up',
       'Phase 7', 'Triage',
       'Phase 8', 'Fix Loop',
@@ -375,16 +376,15 @@ describe('QA skill structure validation', () => {
     expect(sum).toBe(100);
   });
 
-  test('health score has all 8 categories', () => {
+  test('health score has all 4 C++ categories', () => {
     const weights = extractWeightsFromTable(qaContent);
     const expectedCategories = [
-      'Console', 'Links', 'Visual', 'Functional',
-      'UX', 'Performance', 'Content', 'Accessibility',
+      'Build', 'Tests', 'Static Analysis', 'Memory Safety',
     ];
     for (const cat of expectedCategories) {
       expect(weights.has(cat)).toBe(true);
     }
-    expect(weights.size).toBe(8);
+    expect(weights.size).toBe(4);
   });
 
   test('has four mode definitions (Diff-aware/Full/Quick/Regression)', () => {
@@ -397,8 +397,9 @@ describe('QA skill structure validation', () => {
   test('output structure references report directory layout', () => {
     expect(qaContent).toContain('qa-report-');
     expect(qaContent).toContain('baseline.json');
-    expect(qaContent).toContain('screenshots/');
-    expect(qaContent).toContain('.gstack/qa-reports/');
+    expect(qaContent).toContain('build.log');
+    expect(qaContent).toContain('asan.log');
+    expect(qaContent).toContain('.gstackplusplus/qa-reports/');
   });
 });
 
@@ -586,7 +587,7 @@ describe('Contributor mode preamble structure', () => {
     test(`${skill} uses periodic reflection (not per-command)`, () => {
       const content = fs.readFileSync(path.join(ROOT, skill), 'utf-8');
       expect(content).toContain('workflow step');
-      expect(content).not.toContain('After you use gstack-provided CLIs');
+      expect(content).not.toContain('After you use gstack++-provided CLIs');
     });
   }
 });
@@ -663,7 +664,7 @@ describe('Completeness Principle in generated SKILL.md files', () => {
 
   test('Completeness Principle includes compression table', () => {
     const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
-    expect(content).toContain('CC+gstack');
+    expect(content).toContain('CC+gstack++');
     expect(content).toContain('Compression');
   });
 
@@ -753,10 +754,10 @@ describe('CEO review mode validation', () => {
   });
 });
 
-// --- gstack-slug helper ---
+// --- gstackplusplus-slug helper ---
 
-describe('gstack-slug', () => {
-  const SLUG_BIN = path.join(ROOT, 'bin', 'gstack-slug');
+describe('gstackplusplus-slug', () => {
+  const SLUG_BIN = path.join(ROOT, 'bin', 'gstackplusplus-slug');
 
   test('binary exists and is executable', () => {
     expect(fs.existsSync(SLUG_BIN)).toBe(true);
@@ -801,9 +802,9 @@ describe('Test Bootstrap ({{TEST_BOOTSTRAP}}) integration', () => {
   test('TEST_BOOTSTRAP resolver produces valid content', () => {
     const qaContent = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
     expect(qaContent).toContain('Test Framework Bootstrap');
-    expect(qaContent).toContain('RUNTIME:ruby');
-    expect(qaContent).toContain('RUNTIME:node');
-    expect(qaContent).toContain('RUNTIME:python');
+    expect(qaContent).toContain('BUILD:cmake');
+    expect(qaContent).toContain('TEST_FW:gtest');
+    expect(qaContent).toContain('TEST_FW:catch2');
     expect(qaContent).toContain('no-test-bootstrap');
     expect(qaContent).toContain('BOOTSTRAP_DECLINED');
   });
@@ -834,33 +835,33 @@ describe('Test Bootstrap ({{TEST_BOOTSTRAP}}) integration', () => {
     expect(content).toContain('Run `/qa` to bootstrap');
   });
 
-  test('bootstrap includes framework knowledge table', () => {
+  test('bootstrap includes framework knowledge for C++ test frameworks', () => {
     const content = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('vitest');
-    expect(content).toContain('minitest');
-    expect(content).toContain('pytest');
-    expect(content).toContain('cargo test');
-    expect(content).toContain('phpunit');
-    expect(content).toContain('ExUnit');
+    expect(content).toContain('gtest');
+    expect(content).toContain('catch2');
+    expect(content).toContain('doctest');
+    expect(content).toContain('FetchContent');
+    expect(content).toContain('ctest');
   });
 
   test('bootstrap includes CI/CD pipeline generation', () => {
     const content = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('.github/workflows/test.yml');
-    expect(content).toContain('GitHub Actions');
+    expect(content).toContain('.github/workflows/ci.yml');
+    expect(content).toContain('cmake --build build');
   });
 
   test('bootstrap includes first real tests step', () => {
     const content = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('First real tests');
+    expect(content).toContain('first real tests');
     expect(content).toContain('git log --since=30.days');
     expect(content).toContain('Prioritize by risk');
   });
 
-  test('bootstrap includes vibe coding philosophy', () => {
+  test('bootstrap includes test coverage philosophy', () => {
     const content = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('vibe coding');
+    // vibe coding philosophy is in CLAUDE.md section of bootstrap
     expect(content).toContain('100% test coverage');
+    expect(content).toContain('regression test');
   });
 
   test('WebSearch is in allowed-tools for qa, ship, design-review', () => {
@@ -900,7 +901,7 @@ describe('Phase 8e.5 regression test generation', () => {
     const content = fs.readFileSync(path.join(ROOT, 'qa', 'SKILL.md'), 'utf-8');
     expect(content).toContain('// Regression: ISSUE-NNN');
     expect(content).toContain('// Found by /qa on');
-    expect(content).toContain('// Report: .gstack/qa-reports/');
+    expect(content).toContain('// Report: .gstackplusplus/qa-reports/');
   });
 
   test('regression test uses auto-incrementing names', () => {
@@ -956,21 +957,21 @@ describe('Step 3.4 test coverage audit', () => {
     expect(content).toContain('Diagram the execution');
   });
 
-  test('Step 3.4 maps user flows and interaction edge cases', () => {
+  test('Step 3.4 maps caller flows and C++ interaction edge cases', () => {
     const content = fs.readFileSync(path.join(ROOT, 'ship', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('Map user flows');
+    expect(content).toContain('Map caller flows');
     expect(content).toContain('Interaction edge cases');
-    expect(content).toContain('Double-click');
-    expect(content).toContain('Navigate away');
-    expect(content).toContain('Error states the user can see');
-    expect(content).toContain('Empty/zero/boundary states');
+    expect(content).toContain('Concurrent callers');
+    expect(content).toContain('Boundary conditions');
+    expect(content).toContain('Error states callers will encounter');
+    expect(content).toContain('Empty/zero-length');
   });
 
-  test('Step 3.4 diagram includes USER FLOW COVERAGE section', () => {
+  test('Step 3.4 diagram includes CALLER FLOW COVERAGE section', () => {
     const content = fs.readFileSync(path.join(ROOT, 'ship', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('USER FLOW COVERAGE');
+    expect(content).toContain('CALLER FLOW COVERAGE');
     expect(content).toContain('Code paths:');
-    expect(content).toContain('User flows:');
+    expect(content).toContain('Caller flows:');
   });
 });
 

@@ -1,3 +1,200 @@
+# gstack++ — C++ Edition
+
+This is **gstack++ adapted for C++ application, server, and embedded development** — a fork of Garry Tan's [gstack](https://github.com/garrytan/gstack) with every skill, workflow, and placeholder generator rewritten from the ground up for the C++ toolchain.
+
+If you build native code — networked servers, systems software, embedded firmware, or high-performance applications — this is the version for you. It speaks `cmake`, `ctest`, `clang-tidy`, `AddressSanitizer`, `UndefinedBehaviorSanitizer`, `ThreadSanitizer`, and `valgrind`. It knows RAII, the Rule of 0/3/5, `std::span`, `std::string_view`, `std::expected`, ISR safety, and ABI stability. It does not know about browsers, npm, or REST endpoints.
+
+## What's different from the original gstack
+
+The original gstack by Garry Tan targets web development — staging URLs, Playwright browser automation, React components, and TypeScript. This C++ edition replaces every web-specific concept:
+
+| Original (web) | This edition (C++) |
+|---|---|
+| Headless Chromium browser | cmake/make/ninja build system |
+| Playwright screenshot QA | ctest + GoogleTest / Catch2 / doctest |
+| ESLint / TypeScript errors | clang-tidy / cppcheck static analysis |
+| Browser console errors | AddressSanitizer + UBSan memory errors |
+| Network request logs | valgrind memcheck leak reports |
+| `npm test` | `ctest --output-on-failure -j$(nproc)` |
+| Staging URL | Build directory + sanitizer build |
+
+The skill philosophy stays the same: structured roles, review gates, atomic commits, regression tests for every fix. The toolchain is completely different.
+
+## Design principles: YAGNI · KISS · DRY · SOLID
+
+Every gstack++ skill — on every platform — enforces four principles, listed in priority order for when they conflict:
+
+| Principle | Priority | One-line rule |
+|-----------|----------|---------------|
+| **YAGNI** — You Ain't Gonna Need It | 1 | Build for today's requirements. No template parameters for hypothetical future types, no virtual methods before two concrete implementations exist. |
+| **KISS** — Keep It Simple | 2 | Prefer the simplest solution that works. No clever metaprogramming when a plain function suffices. Write for the engineer debugging at 3 am. |
+| **DRY** — Don't Repeat Yourself | 3 | Every piece of knowledge has one authoritative home. Flag duplicated logic aggressively — cite the other file and line. |
+| **SOLID** | 4 | Single Responsibility · Open/Closed · Liskov Substitution · Interface Segregation · Dependency Inversion. Inject dependencies; don't hard-code them. |
+
+The full principle reference — including C++-specific red flags and interaction rules — is defined once in `scripts/gen-skill-docs.ts` as `generateDesignPrinciples()` and injected into every skill that does code analysis or review via `{{DESIGN_PRINCIPLES}}`. This means the definitions are maintained in exactly one place and are consistent across `/plan-eng-review`, `/review`, `/design-review`, `/plan-design-review`, `/qa`, `/ship`, and all six platform meta-skills.
+
+## Supported platforms
+
+gstack++ ships a meta-skill for each supported AI platform. Run it once per project and every subsequent skill adapts automatically. The core workflow — plan, review, QA, ship — is identical across all six; what changes is how the agent makes decisions, formats output, and handles long sessions.
+
+**`/claude`** — The reference implementation. All gstack++ skills are designed and tested for Claude first. Full interactive `AskUserQuestion` flows, extended thinking for deep architecture analysis, and [Conductor](https://conductor.build) multi-session support for running up to 10 parallel agents on separate branches. If you are using Claude Code, this is the default — run `/claude` explicitly only when switching back from another mode.
+
+**`/codex`** — Configures gstack++ for [OpenAI Codex](https://openai.com/codex) (codex-1 autonomous agent). Codex runs headlessly without interactive prompts, so this mode disables `AskUserQuestion` calls, enables structured decision logging, enforces hard caps (30 fixes, 5 files per run, 2-hour wall clock), and writes a `BLOCKED.md` on failure instead of hanging. Every decision is logged to `codex-decisions.md` so you can audit what the agent chose without watching it live.
+
+**`/qwen`** — Configures gstack++ for [Qwen](https://qwenlm.github.io/) (Qwen2.5-Coder, QwQ, Qwen3). Qwen's explicit chain-of-thought reasoning is a strength, so this mode enables structured `<think>` blocks before each phase, confidence-tagged decisions, phase-level summaries, and context compression every 20 tool calls to stay within Qwen's context window. Supports Chinese-language output when the user writes in Chinese.
+
+**`/antigravity`** — Configures gstack++ for [Antigravity](https://antigravity.dev), the AI coding agent built for high-velocity teams. Antigravity's review interface is diff-centric, so this mode enforces minimal diffs (no reformatting bystander lines), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for live progress, formats findings as `[ISSUE:N] SEVERITY — description` for the review UI, and re-detects the toolchain from scratch on every run (Antigravity workspaces are ephemeral). Workspace IDs are appended to commit trailers for conflict tracing.
+
+**`/cursor`** — Configures gstack++ for [Cursor](https://cursor.sh), the AI code editor. Structures every fix as a checkpoint-scoped edit so Cursor's diff review stays clean, formats findings as `@file:line` references that are clickable in the editor, generates and maintains a `.cursorrules` file for persistent project context, and recommends Composer (Cmd+I) for multi-file skills vs. inline chat (Cmd+K) for single-file fixes.
+
+**`/copilot`** — Configures gstack++ for [GitHub Copilot](https://github.com/features/copilot) in VS Code. Creates and maintains `.github/copilot-instructions.md` for automatic context injection, formats findings as `@workspace`-compatible prompts that can be pasted directly into Copilot Chat, emits `[COPILOT EDIT]` blocks for multi-file Copilot Edits, and ensures `/ship`-generated PRs include a structured body for Copilot's PR review feature.
+
+To configure your platform, run the meta-skill once per project:
+
+```
+/claude       # reference mode — full interactive, extended thinking, Conductor support
+/codex        # autonomous mode — no prompts, decision log, hard caps, BLOCKED.md on failure
+/qwen         # reasoning mode — <think> blocks, phase summaries, confidence-tagged decisions
+/antigravity  # diff-centric mode — streaming markers, [ISSUE:N] format, ephemeral workspace
+/cursor       # editor mode — .cursorrules, checkpoint diffs, @file:line findings
+/copilot      # VS Code mode — copilot-instructions.md, @workspace format, Copilot Edits blocks
+```
+
+The choice is written to `~/.gstackplusplus/config.yaml` as `model_mode: <platform>`. All skills read it on startup and adapt their output format and decision behavior accordingly.
+
+## The team
+
+| Skill | Your specialist | What they do |
+|-------|----------------|--------------|
+| `/plan-ceo-review` | **CEO / Founder** | Rethink the problem. Find the 10-star product hiding inside the request. |
+| `/plan-eng-review` | **Eng Manager** | Lock in architecture, ownership model, data flow, ASCII diagrams, UB risks, test matrix. Knows RAII, move semantics, embedded constraints. |
+| `/plan-design-review` | **API Design Reviewer** | Audit C++ API design before writing code. Naming, ownership, error handling, const correctness, thread safety, Doxygen. |
+| `/design-consultation` | **Design Partner** | Build a complete API from scratch. Proposes safe choices and creative risks, generates ownership diagrams, exports `API.md`. |
+| `/review` | **Staff Engineer** | Find memory bugs, UB, data races, and RAII violations that pass CI but blow up in production. |
+| `/ship` | **Release Engineer** | cmake + ctest + clang-tidy + sanitizers → push → PR. Bootstraps GTest/Catch2/doctest if missing. |
+| `/qa` | **QA Lead** | Build → test → static analysis → sanitizers → fix → re-verify. Regression test for every bug fixed. |
+| `/qa-only` | **QA Reporter** | Same as `/qa` but report only — no code changes. |
+| `/design-review` | **API Designer Who Codes** | Audit then fix: minimal diffs, atomic commits, re-verified. |
+| `/retro` | **Eng Manager** | Per-person weekly retro, shipping streaks, test health trends. |
+| `/document-release` | **Technical Writer** | Update README, ARCHITECTURE, CLAUDE.md to match what you just shipped. |
+| `/claude` | **Model Config** | Reference mode — full interactive, extended thinking, Conductor support. |
+| `/codex` | **Model Config** | Codex autonomous mode — decision log, hard caps, no prompts. |
+| `/qwen` | **Model Config** | Qwen reasoning mode — `<think>` blocks, phase summaries, confidence tags. |
+| `/antigravity` | **Model Config** | Antigravity mode — streaming markers, `[ISSUE:N]` format, ephemeral workspace. |
+| `/cursor` | **Model Config** | Cursor editor mode — `.cursorrules`, checkpoint diffs, `@file:line` findings. |
+| `/copilot` | **Model Config** | Copilot VS Code mode — `copilot-instructions.md`, `@workspace` format, Copilot Edits blocks. |
+
+## Quick start
+
+```
+You:    I want to add a zero-copy packet parser to the network stack.
+You:    /plan-ceo-review
+Claude: The real job is zero-allocation deserialization on the hot path — 10M pkts/sec,
+        no heap pressure. Here's what 10-star looks like vs. 3-star: ...
+
+You:    /plan-eng-review
+Claude: [ownership diagrams, std::span over raw pointer+len, std::expected for errors,
+         14-case test matrix, 6 failure modes, 2 UB risks flagged]
+
+You:    /review
+Claude: [AUTO-FIXED] Signed integer overflow in length field (UB)
+        [AUTO-FIXED] Missing bounds check on payload slice
+        [ASK]        Shared mutable dispatch table — data race under TSan → add mutex
+
+You:    /qa
+Claude: Build: ✓ 0 warnings  |  Tests: 47/47 pass
+        ASan: clean  |  TSan: 1 race on packet counter (deferred)
+        Static analysis: 0 findings  |  Health score: 94/100
+
+You:    /ship
+Claude: PR: github.com/you/project/pull/17  (+9 new tests, 100% coverage)
+```
+
+## Install
+
+**Requirements for all platforms:** Git, [Bun](https://bun.sh/) v1.0+, cmake, clang++ or g++
+
+The clone-and-setup step is the same regardless of which platform you use. What differs is the one-time platform configuration you run inside your agent after setup.
+
+### Step 1 — Clone and build (same for all platforms)
+
+```bash
+git clone https://github.com/your-fork/gstackplusplus.git ~/.claude/skills/gstackplusplus
+cd ~/.claude/skills/gstackplusplus && ./setup
+```
+
+### Step 2 — Configure for your platform
+
+**Claude** ([Claude Code](https://docs.anthropic.com/en/docs/claude-code) required)
+
+Open Claude Code in your project and run:
+```
+/claude
+```
+Claude Code will detect the toolchain, write `model_mode: claude` to `~/.gstackplusplus/config.yaml`, and add the `## gstack++` section to your `CLAUDE.md`. All core workflow skills plus the six platform modes are available. Use [Conductor](https://conductor.build) to run up to 10 sessions in parallel.
+
+**Codex** ([OpenAI Codex](https://openai.com/codex) / codex-1)
+
+Point Codex at your repo and run:
+```
+/codex
+```
+Codex mode disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs away unsupervised. All decisions are auditable after the fact.
+
+**Qwen** (Qwen2.5-Coder, QwQ, Qwen3)
+
+In your Qwen session, run:
+```
+/qwen
+```
+Qwen mode turns on `<think>` reasoning blocks before each significant action, phase-level summaries to keep long sessions navigable, and confidence-tagged `AskUserQuestion` responses. Write in Chinese and gstack++ will respond in Chinese; code artifacts stay in English.
+
+**Antigravity** ([Antigravity](https://antigravity.dev))
+
+In your Antigravity workspace, run:
+```
+/antigravity
+```
+Antigravity mode enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live progress view, formats all findings as `[ISSUE:N] SEVERITY — description` for the review UI, and re-detects the toolchain from scratch on every run since Antigravity workspaces are ephemeral.
+
+**Cursor** ([Cursor](https://cursor.sh))
+
+In Cursor Agent or Composer, run:
+```
+/cursor
+```
+Cursor mode writes `model_mode: cursor`, creates or updates `.cursorrules`, formats findings as clickable `@file:line` references, and biases multi-file skills toward checkpoint-sized edits so Cursor's review UI stays readable. Use Composer for `/review`, `/qa`, and `/ship`; use inline chat for one-file follow-up fixes from `/qa-only`.
+
+**GitHub Copilot** ([GitHub Copilot for VS Code](https://github.com/features/copilot))
+
+In Copilot Chat or Copilot Agent, run:
+```
+/copilot
+```
+Copilot mode writes `model_mode: copilot`, creates or updates `.github/copilot-instructions.md`, emits `@workspace`-friendly finding text for Copilot Chat, and structures larger changes as `[COPILOT EDIT]` blocks that paste cleanly into Copilot Edits. `/ship` also formats PR bodies to work better with Copilot's PR review flow.
+
+### CLAUDE.md snippet (all platforms)
+
+After running your platform meta-skill, the snippet is written automatically. If you need to add it manually:
+
+```
+## gstack++
+Skills: /plan-ceo-review, /plan-eng-review, /plan-design-review, /design-consultation,
+/review, /ship, /qa, /qa-only, /design-review, /retro, /document-release,
+/claude, /codex, /qwen, /antigravity, /cursor, /copilot
+C++ toolchain: cmake, ctest, clang-tidy, cppcheck, ASan/UBSan/TSan, valgrind
+```
+
+MIT License. Free forever.
+
+---
+
+## Original README (Garry Tan's gstack — web edition)
+
+The original README for Garry Tan's gstack web edition follows below, preserved in full for context and attribution.
+
+---
+
 # gstack
 
 Hi, I'm [Garry Tan](https://x.com/garrytan). I'm President & CEO of [Y Combinator](https://www.ycombinator.com/), where I've worked with thousands of startups including Coinbase, Instacart, and Rippling when the founders were just one or two people in a garage — companies now worth tens of billions of dollars. Before YC, I designed the Palantir logo and was one of the first eng manager/PM/designers there. I cofounded Posterous, a blog platform we sold to Twitter. I built Bookface, YC's internal social network, back in 2013. I've been building products as a designer, PM, and eng manager for a long time.

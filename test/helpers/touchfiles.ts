@@ -88,8 +88,8 @@ export const E2E_TOUCHFILES: Record<string, string[]> = {
   'plan-design-review-no-ui-scope': ['plan-design-review/**'],
   'design-review-fix':              ['design-review/**', 'browse/src/**'],
 
-  // gstack-upgrade
-  'gstack-upgrade-happy-path': ['gstack-upgrade/**'],
+  // gstackplusplus-upgrade
+  'gstackplusplus-upgrade-happy-path': ['gstackplusplus-upgrade/**'],
 };
 
 /**
@@ -122,7 +122,7 @@ export const LLM_JUDGE_TOUCHFILES: Record<string, string[]> = {
   // Other skills
   'retro/SKILL.md instructions':          ['retro/SKILL.md', 'retro/SKILL.md.tmpl'],
   'qa-only/SKILL.md workflow':            ['qa-only/SKILL.md', 'qa-only/SKILL.md.tmpl'],
-  'gstack-upgrade/SKILL.md upgrade flow': ['gstack-upgrade/SKILL.md', 'gstack-upgrade/SKILL.md.tmpl'],
+  'gstackplusplus-upgrade/SKILL.md upgrade flow': ['gstackplusplus-upgrade/SKILL.md', 'gstackplusplus-upgrade/SKILL.md.tmpl'],
 };
 
 /**

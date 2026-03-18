@@ -98,29 +98,29 @@ function generatePreamble(): string {
   return `## Preamble (run first)
 
 \`\`\`bash
-_UPD=$(~/.claude/skills/gstack/bin/gstack-update-check 2>/dev/null || .claude/skills/gstack/bin/gstack-update-check 2>/dev/null || true)
+_UPD=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || .claude/skills/gstackplusplus/bin/gstackplusplus-update-check 2>/dev/null || true)
 [ -n "$_UPD" ] && echo "$_UPD" || true
-mkdir -p ~/.gstack/sessions
-touch ~/.gstack/sessions/"$PPID"
-_SESSIONS=$(find ~/.gstack/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
-find ~/.gstack/sessions -mmin +120 -type f -delete 2>/dev/null || true
-_CONTRIB=$(~/.claude/skills/gstack/bin/gstack-config get gstack_contributor 2>/dev/null || true)
+mkdir -p ~/.gstackplusplus/sessions
+touch ~/.gstackplusplus/sessions/"$PPID"
+_SESSIONS=$(find ~/.gstackplusplus/sessions -mmin -120 -type f 2>/dev/null | wc -l | tr -d ' ')
+find ~/.gstackplusplus/sessions -mmin +120 -type f -delete 2>/dev/null || true
+_CONTRIB=$(~/.claude/skills/gstackplusplus/bin/gstackplusplus-config get gstackplusplus_contributor 2>/dev/null || true)
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo "BRANCH: $_BRANCH"
-_LAKE_SEEN=$([ -f ~/.gstack/.completeness-intro-seen ] && echo "yes" || echo "no")
+_LAKE_SEEN=$([ -f ~/.gstackplusplus/.completeness-intro-seen ] && echo "yes" || echo "no")
 echo "LAKE_INTRO: $_LAKE_SEEN"
 \`\`\`
 
-If output shows \`UPGRADE_AVAILABLE <old> <new>\`: read \`~/.claude/skills/gstack/gstack-upgrade/SKILL.md\` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If \`JUST_UPGRADED <from> <to>\`: tell user "Running gstack v{to} (just updated!)" and continue.
+If output shows \`UPGRADE_AVAILABLE <old> <new>\`: read \`~/.claude/skills/gstackplusplus/gstackplusplus-upgrade/SKILL.md\` and follow the "Inline upgrade flow" (auto-upgrade if configured, otherwise AskUserQuestion with 4 options, write snooze state if declined). If \`JUST_UPGRADED <from> <to>\`: tell user "Running gstack++ v{to} (just updated!)" and continue.
 
 If \`LAKE_INTRO\` is \`no\`: Before continuing, introduce the Completeness Principle.
-Tell the user: "gstack follows the **Boil the Lake** principle — always do the complete
+Tell the user: "gstack++ follows the **Boil the Lake** principle — always do the complete
 thing when AI makes the marginal cost near-zero. Read more: https://garryslist.org/posts/boil-the-ocean"
 Then offer to open the essay in their default browser:
 
 \`\`\`bash
 open https://garryslist.org/posts/boil-the-ocean
-touch ~/.gstack/.completeness-intro-seen
+touch ~/.gstackplusplus/.completeness-intro-seen
 \`\`\`
 
 Only run \`open\` if the user says yes. Always run \`touch\` to mark as seen. This only happens once.
@@ -141,11 +141,11 @@ Per-skill instructions may add additional formatting rules on top of this baseli
 
 AI-assisted coding makes the marginal cost of completeness near-zero. When you present options:
 
-- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack. "Good enough" is the wrong instinct when "complete" costs minutes more.
+- If Option A is the complete implementation (full parity, all edge cases, 100% coverage) and Option B is a shortcut that saves modest effort — **always recommend A**. The delta between 80 lines and 150 lines is meaningless with CC+gstack++. "Good enough" is the wrong instinct when "complete" costs minutes more.
 - **Lake vs. ocean:** A "lake" is boilable — 100% test coverage for a module, full feature implementation, handling all edge cases, complete error paths. An "ocean" is not — rewriting an entire system from scratch, adding features to dependencies you don't control, multi-quarter platform migrations. Recommend boiling lakes. Flag oceans as out of scope.
-- **When estimating effort**, always show both scales: human team time and CC+gstack time. The compression ratio varies by task type — use this reference:
+- **When estimating effort**, always show both scales: human team time and CC+gstack++ time. The compression ratio varies by task type — use this reference:
 
-| Task type | Human team | CC+gstack | Compression |
+| Task type | Human team | CC+gstack++ | Compression |
 |-----------|-----------|-----------|-------------|
 | Boilerplate / scaffolding | 2 days | 15 min | ~100x |
 | Test writing | 1 day | 15 min | ~50x |
@@ -164,20 +164,20 @@ AI-assisted coding makes the marginal cost of completeness near-zero. When you p
 
 ## Contributor Mode
 
-If \`_CONTRIB\` is \`true\`: you are in **contributor mode**. You're a gstack user who also helps make it better.
+If \`_CONTRIB\` is \`true\`: you are in **contributor mode**. You're a gstack++ user who also helps make it better.
 
-**At the end of each major workflow step** (not after every single command), reflect on the gstack tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack code or skill markdown — file a field report. Maybe our contributor will help make us better!
+**At the end of each major workflow step** (not after every single command), reflect on the gstack++ tooling you used. Rate your experience 0 to 10. If it wasn't a 10, think about why. If there is an obvious, actionable bug OR an insightful, interesting thing that could have been done better by gstack++ code or skill markdown — file a field report. Maybe our contributor will help make us better!
 
-**Calibration — this is the bar:** For example, \`$B js "await fetch(...)"\` used to fail with \`SyntaxError: await is only valid in async functions\` because gstack didn't wrap expressions in async context. Small, but the input was reasonable and gstack should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
+**Calibration — this is the bar:** For example, \`$B js "await fetch(...)"\` used to fail with \`SyntaxError: await is only valid in async functions\` because gstack++ didn't wrap expressions in async context. Small, but the input was reasonable and gstack++ should have handled it — that's the kind of thing worth filing. Things less consequential than this, ignore.
 
 **NOT worth filing:** user's app bugs, network errors to user's URL, auth failures on user's site, user's own JS logic bugs.
 
-**To file:** write \`~/.gstack/contributor-logs/{slug}.md\` with **all sections below** (do not truncate — include every section through the Date/Version footer):
+**To file:** write \`~/.gstackplusplus/contributor-logs/{slug}.md\` with **all sections below** (do not truncate — include every section through the Date/Version footer):
 
 \`\`\`
 # {Title}
 
-Hey gstack team — ran into this while using /{skill-name}:
+Hey gstack++ team — ran into this while using /{skill-name}:
 
 **What I was trying to do:** {what the user/agent was attempting}
 **What happened instead:** {what actually happened}
@@ -192,33 +192,52 @@ Hey gstack team — ran into this while using /{skill-name}:
 \`\`\`
 
 ## What would make this a 10
-{one sentence: what gstack should have done differently}
+{one sentence: what gstack++ should have done differently}
 
-**Date:** {YYYY-MM-DD} | **Version:** {gstack version} | **Skill:** /{skill}
+**Date:** {YYYY-MM-DD} | **Version:** {gstack++ version} | **Skill:** /{skill}
 \`\`\`
 
-Slug: lowercase, hyphens, max 60 chars (e.g. \`browse-js-no-await\`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack field report: {title}"`;
+Slug: lowercase, hyphens, max 60 chars (e.g. \`browse-js-no-await\`). Skip if file already exists. Max 3 reports per session. File inline and continue — don't stop the workflow. Tell user: "Filed gstack++ field report: {title}"`;
 }
 
 function generateBrowseSetup(): string {
-  return `## SETUP (run this check BEFORE any browse command)
+  return `## SETUP (run this toolchain check BEFORE any build/test command)
 
 \`\`\`bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-B=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
-[ -z "$B" ] && B=~/.claude/skills/gstack/browse/dist/browse
-if [ -x "$B" ]; then
-  echo "READY: $B"
-else
-  echo "NEEDS_SETUP"
-fi
+# Detect build system
+CMAKE_BIN=$(command -v cmake 2>/dev/null || echo "")
+MAKE_BIN=$(command -v make 2>/dev/null || echo "")
+NINJA_BIN=$(command -v ninja 2>/dev/null || echo "")
+CXX_BIN=$(command -v clang++ 2>/dev/null || command -v g++ 2>/dev/null || echo "")
+CTEST_BIN=$(command -v ctest 2>/dev/null || echo "")
+CLANG_TIDY_BIN=$(command -v clang-tidy 2>/dev/null || echo "")
+VALGRIND_BIN=$(command -v valgrind 2>/dev/null || echo "")
+[ -n "$CMAKE_BIN" ] && echo "CMAKE:$CMAKE_BIN" || echo "CMAKE:MISSING"
+[ -n "$CXX_BIN" ] && echo "CXX:$CXX_BIN" || echo "CXX:MISSING"
+[ -n "$CTEST_BIN" ] && echo "CTEST:$CTEST_BIN" || echo "CTEST:MISSING"
+[ -n "$CLANG_TIDY_BIN" ] && echo "CLANG_TIDY:$CLANG_TIDY_BIN" || echo "CLANG_TIDY:MISSING"
+[ -n "$VALGRIND_BIN" ] && echo "VALGRIND:$VALGRIND_BIN" || echo "VALGRIND:MISSING"
+# Detect build directory
+[ -d build ] && echo "BUILD_DIR:build" || \
+[ -d cmake-build-debug ] && echo "BUILD_DIR:cmake-build-debug" || \
+[ -d out ] && echo "BUILD_DIR:out" || echo "BUILD_DIR:NONE"
+# Detect project type
+[ -f CMakeLists.txt ] && echo "BUILD_SYSTEM:cmake"
+[ -f Makefile ] && echo "BUILD_SYSTEM:make"
+[ -f meson.build ] && echo "BUILD_SYSTEM:meson"
+[ -f BUILD ] || [ -f BUILD.bazel ] && echo "BUILD_SYSTEM:bazel"
 \`\`\`
 
-If \`NEEDS_SETUP\`:
-1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
-2. Run: \`cd <SKILL_DIR> && ./setup\`
-3. If \`bun\` is not installed: \`curl -fsSL https://bun.sh/install | bash\``;
+If \`CMAKE:MISSING\` or \`CXX:MISSING\`: warn the user that the required toolchain is not installed.
+Suggest: \`sudo apt-get install cmake g++ clang clang-tidy valgrind\` (Linux) or \`brew install cmake llvm valgrind\` (macOS).
+
+If \`BUILD_DIR:NONE\` and \`BUILD_SYSTEM:cmake\`: the project has not been configured yet.
+Run the CMake configure step before building:
+\`\`\`bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+\`\`\`
+
+Store the build directory as \`$BUILD_DIR\` for use in subsequent steps.`;
 }
 
 function generateBaseBranchDetect(): string {
@@ -245,9 +264,9 @@ branch name wherever the instructions say "the base branch."
 function generateQAMethodology(): string {
   return `## Modes
 
-### Diff-aware (automatic when on a feature branch with no URL)
+### Diff-aware (automatic when on a feature branch)
 
-This is the **primary mode** for developers verifying their work. When the user says \`/qa\` without a URL and the repo is on a feature branch, automatically:
+This is the **primary mode** for developers verifying their work. When the user says \`/qa\` without a specific target and the repo is on a feature branch, automatically:
 
 1. **Analyze the branch diff** to understand what changed:
    \`\`\`bash
@@ -255,48 +274,34 @@ This is the **primary mode** for developers verifying their work. When the user 
    git log main..HEAD --oneline
    \`\`\`
 
-2. **Identify affected pages/routes** from the changed files:
-   - Controller/route files → which URL paths they serve
-   - View/template/component files → which pages render them
-   - Model/service files → which pages use those models (check controllers that reference them)
-   - CSS/style files → which pages include those stylesheets
-   - API endpoints → test them directly with \`$B js "await fetch('/api/...')"\`
-   - Static pages (markdown, HTML) → navigate to them directly
+2. **Identify affected modules/components** from the changed files:
+   - Source files (.cpp, .cxx, .cc) → which compiled units changed
+   - Header files (.h, .hpp) → which API contracts or data structures changed
+   - CMakeLists.txt changes → which build targets were added/modified
+   - Test files → which tests were added or modified
 
-3. **Detect the running app** — check common local dev ports:
+3. **Determine test scope** — build and run only tests related to changed modules:
    \`\`\`bash
-   $B goto http://localhost:3000 2>/dev/null && echo "Found app on :3000" || \\
-   $B goto http://localhost:4000 2>/dev/null && echo "Found app on :4000" || \\
-   $B goto http://localhost:8080 2>/dev/null && echo "Found app on :8080"
+   cmake --build $BUILD_DIR --target <affected-target> 2>&1
+   ctest --test-dir $BUILD_DIR -R "<test-pattern>" -V 2>&1
    \`\`\`
-   If no local app is found, check for a staging/preview URL in the PR or environment. If nothing works, ask the user for the URL.
 
-4. **Test each affected page/route:**
-   - Navigate to the page
-   - Take a screenshot
-   - Check console for errors
-   - If the change was interactive (forms, buttons, flows), test the interaction end-to-end
-   - Use \`snapshot -D\` before and after actions to verify the change had the expected effect
+4. **Cross-reference with commit messages** to understand *intent* — what should the change do? Verify tests cover that intent.
 
-5. **Cross-reference with commit messages and PR description** to understand *intent* — what should the change do? Verify it actually does that.
+5. **Check TODOS.md** (if it exists) for known bugs related to changed files. If a TODO describes a bug this branch should fix, add it to the test plan.
 
-6. **Check TODOS.md** (if it exists) for known bugs or issues related to the changed files. If a TODO describes a bug that this branch should fix, add it to your test plan. If you find a new bug during QA that isn't in TODOS.md, note it in the report.
+6. **Report findings** scoped to the branch changes:
+   - "Changed modules: N .cpp files, M headers"
+   - For each: do existing tests pass? Any new failures?
 
-7. **Report findings** scoped to the branch changes:
-   - "Changes tested: N pages/routes affected by this branch"
-   - For each: does it work? Screenshot evidence.
-   - Any regressions on adjacent pages?
-
-**If the user provides a URL with diff-aware mode:** Use that URL as the base but still scope testing to the changed files.
-
-### Full (default when URL is provided)
-Systematic exploration. Visit every reachable page. Document 5-10 well-evidenced issues. Produce health score. Takes 5-15 minutes depending on app size.
+### Full (default)
+Build all targets, run full test suite, run static analysis, run memory checks. Produce health score. Takes 2-10 minutes depending on project size.
 
 ### Quick (\`--quick\`)
-30-second smoke test. Visit homepage + top 5 navigation targets. Check: page loads? Console errors? Broken links? Produce health score. No detailed issue documentation.
+Build and run only smoke tests (fastest subset). Check: does it compile? Do unit tests pass? No memory analysis. Produce health score.
 
 ### Regression (\`--regression <baseline>\`)
-Run full mode, then load \`baseline.json\` from a previous run. Diff: which issues are fixed? Which are new? What's the score delta? Append regression section to report.
+Run full mode, then load \`baseline.json\` from a previous run. Diff: which issues are fixed? Which are new? What's the score delta?
 
 ---
 
@@ -304,136 +309,121 @@ Run full mode, then load \`baseline.json\` from a previous run. Diff: which issu
 
 ### Phase 1: Initialize
 
-1. Find browse binary (see Setup above)
+1. Check toolchain (see Setup above)
 2. Create output directories
-3. Copy report template from \`qa/templates/qa-report-template.md\` to output dir
+3. Configure build if needed (cmake configure step)
 4. Start timer for duration tracking
 
-### Phase 2: Authenticate (if needed)
-
-**If the user specified auth credentials:**
+### Phase 2: Build
 
 \`\`\`bash
-$B goto <login-url>
-$B snapshot -i                    # find the login form
-$B fill @e3 "user@example.com"
-$B fill @e4 "[REDACTED]"         # NEVER include real passwords in report
-$B click @e5                      # submit
-$B snapshot -D                    # verify login succeeded
+# Full build with all warnings enabled
+cmake --build $BUILD_DIR --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4) 2>&1 | tee $REPORT_DIR/build.log
 \`\`\`
 
-**If the user provided a cookie file:**
+**Parse build output for:**
+- Errors (compilation failures)
+- Warnings: \`-Wall -Wextra -Wpedantic\` warnings are issues
+  - \`-Wunused-*\`: dead code
+  - \`-Wshadow\`: shadowed variables
+  - \`-Wconversion\`: implicit narrowing
+  - \`-Wnull-dereference\`: potential null deref
+  - \`-Wformat-security\`: format string issues
+
+**If build fails:** Document every error. STOP — no point running tests on code that doesn't compile.
+
+### Phase 3: Unit Tests
 
 \`\`\`bash
-$B cookie-import cookies.json
-$B goto <target-url>
+ctest --test-dir $BUILD_DIR --output-on-failure -V 2>&1 | tee $REPORT_DIR/test.log
 \`\`\`
 
-**If 2FA/OTP is required:** Ask the user for the code and wait.
+**Parse test output for:**
+- Test pass/fail counts
+- FAILED test names and assertion messages
+- Timeout failures (test took too long → possible hang/infinite loop)
+- Segfault or signal-based failures (immediate memory safety red flag)
 
-**If CAPTCHA blocks you:** Tell the user: "Please complete the CAPTCHA in the browser, then tell me to continue."
+For GTest output, look for:
+- \`[  FAILED  ] TestSuite.TestCase\`
+- \`Segmentation fault\` in test output
+- \`SIGABRT\` from assert failures
 
-### Phase 3: Orient
-
-Get a map of the application:
+### Phase 4: Static Analysis
 
 \`\`\`bash
-$B goto <target-url>
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/initial.png"
-$B links                          # map navigation structure
-$B console --errors               # any errors on landing?
+# clang-tidy (if compile_commands.json available)
+if [ -f $BUILD_DIR/compile_commands.json ]; then
+  find . -name "*.cpp" -not -path "*/build/*" -not -path "*/test/*" | \\
+    head -50 | xargs clang-tidy -p $BUILD_DIR 2>&1 | tee $REPORT_DIR/clang-tidy.log
+fi
+
+# cppcheck (supplementary)
+cppcheck --enable=all --suppress=missingIncludeSystem \\
+  --error-exitcode=1 --xml --xml-version=2 \\
+  -I include/ src/ 2>$REPORT_DIR/cppcheck.xml || true
 \`\`\`
 
-**Detect framework** (note in report metadata):
-- \`__next\` in HTML or \`_next/data\` requests → Next.js
-- \`csrf-token\` meta tag → Rails
-- \`wp-content\` in URLs → WordPress
-- Client-side routing with no page reloads → SPA
+**clang-tidy checks to flag as issues:**
+- \`bugprone-*\`: likely bugs
+- \`cppcoreguidelines-*\`: guideline violations
+- \`clang-analyzer-*\`: static analysis findings
+- \`performance-*\`: performance issues
+- \`modernize-*\`: outdated C++ patterns (flag as informational)
+- \`readability-*\`: readability issues (flag as low severity)
 
-**For SPAs:** The \`links\` command may return few results because navigation is client-side. Use \`snapshot -i\` to find nav elements (buttons, menu items) instead.
+**cppcheck findings to flag:**
+- \`error\` severity: always a critical issue
+- \`warning\` severity: high issue
+- \`performance\`, \`style\`: low/informational issue
 
-### Phase 4: Explore
+### Phase 5: Memory Analysis
 
-Visit pages systematically. At each page:
-
+**AddressSanitizer (preferred — build-time):**
 \`\`\`bash
-$B goto <page-url>
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/page-name.png"
-$B console --errors
+# Check if ASan build exists or build one
+if cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \\
+    -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \\
+    -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" 2>&1; then
+  cmake --build build-asan --parallel $(nproc 2>/dev/null || echo 4) 2>&1
+  ASAN_OPTIONS=halt_on_error=0 ctest --test-dir build-asan -V 2>&1 | tee $REPORT_DIR/asan.log
+fi
 \`\`\`
 
-Then follow the **per-page exploration checklist** (see \`qa/references/issue-taxonomy.md\`):
-
-1. **Visual scan** — Look at the annotated screenshot for layout issues
-2. **Interactive elements** — Click buttons, links, controls. Do they work?
-3. **Forms** — Fill and submit. Test empty, invalid, edge cases
-4. **Navigation** — Check all paths in and out
-5. **States** — Empty state, loading, error, overflow
-6. **Console** — Any new JS errors after interactions?
-7. **Responsiveness** — Check mobile viewport if relevant:
-   \`\`\`bash
-   $B viewport 375x812
-   $B screenshot "$REPORT_DIR/screenshots/page-mobile.png"
-   $B viewport 1280x720
-   \`\`\`
-
-**Depth judgment:** Spend more time on core features (homepage, dashboard, checkout, search) and less on secondary pages (about, terms, privacy).
-
-**Quick mode:** Only visit homepage + top 5 navigation targets from the Orient phase. Skip the per-page checklist — just check: loads? Console errors? Broken links visible?
-
-### Phase 5: Document
-
-Document each issue **immediately when found** — don't batch them.
-
-**Two evidence tiers:**
-
-**Interactive bugs** (broken flows, dead buttons, form failures):
-1. Take a screenshot before the action
-2. Perform the action
-3. Take a screenshot showing the result
-4. Use \`snapshot -D\` to show what changed
-5. Write repro steps referencing screenshots
-
+**Valgrind (fallback — slower but works with any binary):**
 \`\`\`bash
-$B screenshot "$REPORT_DIR/screenshots/issue-001-step-1.png"
-$B click @e5
-$B screenshot "$REPORT_DIR/screenshots/issue-001-result.png"
-$B snapshot -D
+# Run test binary under valgrind if ASan unavailable
+valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all \\
+  --error-exitcode=1 --xml=yes --xml-file=$REPORT_DIR/valgrind.xml \\
+  <test-binary> 2>&1 | tee $REPORT_DIR/valgrind.log || true
 \`\`\`
 
-**Static bugs** (typos, layout issues, missing images):
-1. Take a single annotated screenshot showing the problem
-2. Describe what's wrong
-
-\`\`\`bash
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/issue-002.png"
-\`\`\`
-
-**Write each issue to the report immediately** using the template format from \`qa/templates/qa-report-template.md\`.
+**Parse for:**
+- Heap use-after-free: critical issue
+- Buffer overflow/underflow: critical issue
+- Memory leaks (reachable): high issue; (definitely lost): critical issue
+- Uninitialized value reads: high issue
+- Invalid free / double-free: critical issue
+- Stack overflows (embedded projects): critical issue
 
 ### Phase 6: Wrap Up
 
 1. **Compute health score** using the rubric below
-2. **Write "Top 3 Things to Fix"** — the 3 highest-severity issues
-3. **Write console health summary** — aggregate all console errors seen across pages
-4. **Update severity counts** in the summary table
-5. **Fill in report metadata** — date, duration, pages visited, screenshot count, framework
+2. **Write "Top 3 Things to Fix"** — highest-severity issues
+3. **Write build health summary** — warning count, error count
+4. **Write test health summary** — pass rate, failures
+5. **Fill in report metadata** — date, duration, compiler, platform, build type
 6. **Save baseline** — write \`baseline.json\` with:
    \`\`\`json
    {
      "date": "YYYY-MM-DD",
-     "url": "<target>",
+     "compiler": "clang++ 17 / g++ 14",
+     "platform": "linux-x86_64",
      "healthScore": N,
      "issues": [{ "id": "ISSUE-001", "title": "...", "severity": "...", "category": "..." }],
-     "categoryScores": { "console": N, "links": N, ... }
+     "categoryScores": { "build": N, "tests": N, "static_analysis": N, "memory": N }
    }
    \`\`\`
-
-**Regression mode:** After writing the report, load the baseline file. Compare:
-- Health score delta
-- Issues fixed (in baseline but not current)
-- New issues (in current but not baseline)
-- Append the regression section to the report
 
 ---
 
@@ -441,362 +431,295 @@ $B snapshot -i -a -o "$REPORT_DIR/screenshots/issue-002.png"
 
 Compute each category score (0-100), then take the weighted average.
 
-### Console (weight: 15%)
-- 0 errors → 100
-- 1-3 errors → 70
-- 4-10 errors → 40
-- 10+ errors → 10
+### Build (weight: 25%)
+- 0 errors, 0 warnings → 100
+- 0 errors, 1-5 warnings → 80
+- 0 errors, 6-20 warnings → 60
+- 0 errors, 20+ warnings → 40
+- Any errors → 0
 
-### Links (weight: 10%)
-- 0 broken → 100
-- Each broken link → -15 (minimum 0)
+### Tests (weight: 35%)
+- All pass → 100
+- 1-2 failures → 60
+- 3-10 failures → 30
+- 10+ failures or segfault → 0
 
-### Per-Category Scoring (Visual, Functional, UX, Content, Performance, Accessibility)
-Each category starts at 100. Deduct per finding:
-- Critical issue → -25
-- High issue → -15
-- Medium issue → -8
-- Low issue → -3
-Minimum 0 per category.
+### Static Analysis (weight: 20%)
+- 0 findings → 100
+- 1-3 findings → 70
+- 4-10 findings → 40
+- 10+ findings → 10
+
+### Memory Safety (weight: 20%)
+- No leaks, no errors → 100
+- Reachable leaks only → 70
+- Definite leaks or use-after-free → 20
+- Buffer overflow or double-free → 0
 
 ### Weights
+
 | Category | Weight |
 |----------|--------|
-| Console | 15% |
-| Links | 10% |
-| Visual | 10% |
-| Functional | 20% |
-| UX | 15% |
-| Performance | 10% |
-| Content | 5% |
-| Accessibility | 15% |
+| Build | 25% |
+| Tests | 35% |
+| Static Analysis | 20% |
+| Memory Safety | 20% |
 
 ### Final Score
 \`score = Σ (category_score × weight)\`
 
 ---
 
-## Framework-Specific Guidance
+## Project-Type Guidance
 
-### Next.js
-- Check console for hydration errors (\`Hydration failed\`, \`Text content did not match\`)
-- Monitor \`_next/data\` requests in network — 404s indicate broken data fetching
-- Test client-side navigation (click links, don't just \`goto\`) — catches routing issues
-- Check for CLS (Cumulative Layout Shift) on pages with dynamic content
+### Embedded / Bare-metal
+- Check for dynamic memory allocation in ISR context (flag as critical)
+- Verify stack usage estimates (\`-fstack-usage\` flag or manual analysis)
+- Check for blocking operations (sleep, mutex lock) in interrupt handlers
+- Verify volatile on hardware register accesses and shared ISR data
+- Check for missing memory barriers (\`__DSB\`, \`__DMB\` on ARM)
+- Cross-compilation: ensure tests run on simulator or target hardware, not host
 
-### Rails
-- Check for N+1 query warnings in console (if development mode)
-- Verify CSRF token presence in forms
-- Test Turbo/Stimulus integration — do page transitions work smoothly?
-- Check for flash messages appearing and dismissing correctly
+### Server / Daemon
+- Thread safety: check for data races (run with ThreadSanitizer: \`-fsanitize=thread\`)
+- Check for blocking operations in event-loop callbacks
+- Check for unbounded memory growth (caches without eviction, growing queues)
+- Check for proper signal handling (\`SIGPIPE\`, \`SIGTERM\`, \`SIGHUP\`)
+- Check for file descriptor leaks
 
-### WordPress
-- Check for plugin conflicts (JS errors from different plugins)
-- Verify admin bar visibility for logged-in users
-- Test REST API endpoints (\`/wp-json/\`)
-- Check for mixed content warnings (common with WP)
-
-### General SPA (React, Vue, Angular)
-- Use \`snapshot -i\` for navigation — \`links\` command misses client-side routes
-- Check for stale state (navigate away and back — does data refresh?)
-- Test browser back/forward — does the app handle history correctly?
-- Check for memory leaks (monitor console after extended use)
+### Application / Library
+- Check public API stability (no ABI-breaking changes without version bump)
+- Verify header-only code compiles cleanly across C++14/17/20 (if claimed)
+- Check for ODR violations (multiple translation units defining same symbol)
 
 ---
 
 ## Important Rules
 
-1. **Repro is everything.** Every issue needs at least one screenshot. No exceptions.
-2. **Verify before documenting.** Retry the issue once to confirm it's reproducible, not a fluke.
-3. **Never include credentials.** Write \`[REDACTED]\` for passwords in repro steps.
-4. **Write incrementally.** Append each issue to the report as you find it. Don't batch.
-5. **Never read source code.** Test as a user, not a developer.
-6. **Check console after every interaction.** JS errors that don't surface visually are still bugs.
-7. **Test like a user.** Use realistic data. Walk through complete workflows end-to-end.
-8. **Depth over breadth.** 5-10 well-documented issues with evidence > 20 vague descriptions.
-9. **Never delete output files.** Screenshots and reports accumulate — that's intentional.
-10. **Use \`snapshot -C\` for tricky UIs.** Finds clickable divs that the accessibility tree misses.
-11. **Show screenshots to the user.** After every \`$B screenshot\`, \`$B snapshot -a -o\`, or \`$B responsive\` command, use the Read tool on the output file(s) so the user can see them inline. For \`responsive\` (3 files), Read all three. This is critical — without it, screenshots are invisible to the user.`;
+1. **Build errors block everything.** If it doesn't compile, nothing else matters.
+2. **Memory errors are critical.** Any ASAN/valgrind error is high or critical severity.
+3. **Never skip static analysis.** clang-tidy catches real bugs, not just style.
+4. **Test failures are not suggestions.** A failing test is a bug report.
+5. **Write incrementally.** Append each issue to the report as you find it. Don't batch.
+6. **Platform matters.** Note the compiler, platform, and build flags in every report.
+7. **Depth over breadth.** 5-10 well-documented issues > 20 vague observations.
+8. **Never delete output files.** Build logs and reports accumulate — that's intentional.`;
 }
 
 function generateDesignReviewLite(): string {
-  return `## Design Review (conditional, diff-scoped)
+  return `## API Design Review (conditional, diff-scoped)
 
-Check if the diff touches frontend files using \`gstack-diff-scope\`:
+Check if the diff touches public interface files using \`gstackplusplus-diff-scope\`:
 
 \`\`\`bash
-eval $(~/.claude/skills/gstack/bin/gstack-diff-scope <base> 2>/dev/null)
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-diff-scope <base> 2>/dev/null)
 \`\`\`
 
-**If \`SCOPE_FRONTEND=false\`:** Skip design review silently. No output.
+**If \`SCOPE_FRONTEND=false\` and no header files changed:** Skip API design review silently. No output.
 
-**If \`SCOPE_FRONTEND=true\`:**
+**If header files (.h, .hpp) appear in the diff OR \`SCOPE_FRONTEND=true\`:**
 
-1. **Check for DESIGN.md.** If \`DESIGN.md\` or \`design-system.md\` exists in the repo root, read it. All design findings are calibrated against it — patterns blessed in DESIGN.md are not flagged. If not found, use universal design principles.
+1. **Check for API.md.** If \`API.md\`, \`DESIGN.md\`, or similar exists in the repo root, read it. All API findings are calibrated against it — patterns blessed in API.md are not flagged. If not found, use the universal C++ API design principles below.
 
-2. **Read \`.claude/skills/review/design-checklist.md\`.** If the file cannot be read, skip design review with a note: "Design checklist not found — skipping design review."
+2. **Read \`.claude/skills/review/api-design-checklist.md\`.** If the file cannot be read, skip with a note: "API design checklist not found — skipping API design review."
 
-3. **Read each changed frontend file** (full file, not just diff hunks). Frontend files are identified by the patterns listed in the checklist.
+3. **Read each changed header file** (full file, not just diff hunks). Header files are identified by .h, .hpp, .hxx extensions.
 
-4. **Apply the design checklist** against the changed files. For each item:
-   - **[HIGH] mechanical CSS fix** (\`outline: none\`, \`!important\`, \`font-size < 16px\`): classify as AUTO-FIX
-   - **[HIGH/MEDIUM] design judgment needed**: classify as ASK
-   - **[LOW] intent-based detection**: present as "Possible — verify visually or run /design-review"
+4. **Apply the API design checklist** against the changed headers. For each item:
+   - **[HIGH] mechanical fix** (missing \`const\`, raw owning pointer, undocumented precondition): classify as AUTO-FIX
+   - **[HIGH/MEDIUM] design judgment needed** (naming, error strategy, ownership model): classify as ASK
+   - **[LOW] style/documentation**: present as "Consider — verify with team style guide or run /design-review"
 
-5. **Include findings** in the review output under a "Design Review" header, following the output format in the checklist. Design findings merge with code review findings into the same Fix-First flow.
+5. **Include findings** in the review output under an "API Design Review" header, following the Fix-First flow in Step 5 — AUTO-FIX for mechanical fixes, ASK for everything else.
 
 6. **Log the result** for the Review Readiness Dashboard:
 
 \`\`\`bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
-echo '{"skill":"design-review-lite","timestamp":"TIMESTAMP","status":"STATUS","findings":N,"auto_fixed":M}' >> ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
+echo '{"skill":"design-review-lite","timestamp":"TIMESTAMP","status":"STATUS","findings":N,"auto_fixed":M}' >> ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl
 \`\`\`
 
 Substitute: TIMESTAMP = ISO 8601 datetime, STATUS = "clean" if 0 findings or "issues_found", N = total findings, M = auto-fixed count.`;
 }
-
-// NOTE: design-checklist.md is a subset of this methodology for code-level detection.
-// When adding items here, also update review/design-checklist.md, and vice versa.
+// NOTE: api-design-checklist.md is a subset of this methodology for code-level detection.
+// When adding items here, also update review/api-design-checklist.md, and vice versa.
 function generateDesignMethodology(): string {
   return `## Modes
 
 ### Full (default)
-Systematic review of all pages reachable from homepage. Visit 5-8 pages. Full checklist evaluation, responsive screenshots, interaction flow testing. Produces complete design audit report with letter grades.
+Systematic review of all public headers and interfaces. Full checklist evaluation, Doxygen coverage check, error handling audit. Produces complete API design report with letter grades.
 
 ### Quick (\`--quick\`)
-Homepage + 2 key pages only. First Impression + Design System Extraction + abbreviated checklist. Fastest path to a design score.
+Public headers only, first-impression API review + abbreviated checklist. Fastest path to a design score.
 
 ### Deep (\`--deep\`)
-Comprehensive review: 10-15 pages, every interaction flow, exhaustive checklist. For pre-launch audits or major redesigns.
+Comprehensive review: all headers + key source files, interaction flows, cross-platform portability. For pre-release API freezes or major library refactors.
 
-### Diff-aware (automatic when on a feature branch with no URL)
-When on a feature branch, scope to pages affected by the branch changes:
+### Diff-aware (automatic when on a feature branch)
+When on a feature branch, scope to headers and interfaces changed:
 1. Analyze the branch diff: \`git diff main...HEAD --name-only\`
-2. Map changed files to affected pages/routes
-3. Detect running app on common local ports (3000, 4000, 8080)
-4. Audit only affected pages, compare design quality before/after
+2. Find changed .h/.hpp files — these define the public contract
+3. Audit only changed APIs, compare design quality before/after
 
-### Regression (\`--regression\` or previous \`design-baseline.json\` found)
-Run full audit, then load previous \`design-baseline.json\`. Compare: per-category grade deltas, new findings, resolved findings. Output regression table in report.
+### Regression (\`--regression\` or previous \`api-design-baseline.json\` found)
+Run full audit, then load previous \`api-design-baseline.json\`. Compare: per-category grade deltas, new findings, resolved findings. Output regression table in report.
 
 ---
 
 ## Phase 1: First Impression
 
-The most uniquely designer-like output. Form a gut reaction before analyzing anything.
+Form a gut reaction about the API before deep analysis.
 
-1. Navigate to the target URL
-2. Take a full-page desktop screenshot: \`$B screenshot "$REPORT_DIR/screenshots/first-impression.png"\`
-3. Write the **First Impression** using this structured critique format:
-   - "The site communicates **[what]**." (what it says at a glance — competence? playfulness? confusion?)
-   - "I notice **[observation]**." (what stands out, positive or negative — be specific)
-   - "The first 3 things my eye goes to are: **[1]**, **[2]**, **[3]**." (hierarchy check — are these intentional?)
-   - "If I had to describe this in one word: **[word]**." (gut verdict)
+1. List all public headers:
+   \`\`\`bash
+   find include/ -name "*.h" -o -name "*.hpp" 2>/dev/null | sort
+   \`\`\`
+2. Read the primary public header(s)
+3. Write the **First Impression**:
+   - "The API communicates **[what]**." (intent clear at a glance?)
+   - "I notice **[observation]**." (naming inconsistency? unclear ownership? good symmetry?)
+   - "The 3 first design concerns are: **[1]**, **[2]**, **[3]**."
+   - "If I had to describe this API in one word: **[word]**."
 
-This is the section users read first. Be opinionated. A designer doesn't hedge — they react.
-
----
-
-## Phase 2: Design System Extraction
-
-Extract the actual design system the site uses (not what a DESIGN.md says, but what's rendered):
-
-\`\`\`bash
-# Fonts in use (capped at 500 elements to avoid timeout)
-$B js "JSON.stringify([...new Set([...document.querySelectorAll('*')].slice(0,500).map(e => getComputedStyle(e).fontFamily))])"
-
-# Color palette in use
-$B js "JSON.stringify([...new Set([...document.querySelectorAll('*')].slice(0,500).flatMap(e => [getComputedStyle(e).color, getComputedStyle(e).backgroundColor]).filter(c => c !== 'rgba(0, 0, 0, 0)'))])"
-
-# Heading hierarchy
-$B js "JSON.stringify([...document.querySelectorAll('h1,h2,h3,h4,h5,h6')].map(h => ({tag:h.tagName, text:h.textContent.trim().slice(0,50), size:getComputedStyle(h).fontSize, weight:getComputedStyle(h).fontWeight})))"
-
-# Touch target audit (find undersized interactive elements)
-$B js "JSON.stringify([...document.querySelectorAll('a,button,input,[role=button]')].filter(e => {const r=e.getBoundingClientRect(); return r.width>0 && (r.width<44||r.height<44)}).map(e => ({tag:e.tagName, text:(e.textContent||'').trim().slice(0,30), w:Math.round(e.getBoundingClientRect().width), h:Math.round(e.getBoundingClientRect().height)})).slice(0,20))"
-
-# Performance baseline
-$B perf
-\`\`\`
-
-Structure findings as an **Inferred Design System**:
-- **Fonts:** list with usage counts. Flag if >3 distinct font families.
-- **Colors:** palette extracted. Flag if >12 unique non-gray colors. Note warm/cool/mixed.
-- **Heading Scale:** h1-h6 sizes. Flag skipped levels, non-systematic size jumps.
-- **Spacing Patterns:** sample padding/margin values. Flag non-scale values.
-
-After extraction, offer: *"Want me to save this as your DESIGN.md? I can lock in these observations as your project's design system baseline."*
+A good API is like a good tool: it does one thing, it's hard to misuse, and the happy path is the obvious path.
 
 ---
 
-## Phase 3: Page-by-Page Visual Audit
+## Phase 2: API Contract Extraction
 
-For each page in scope:
+Extract the actual API shape:
 
 \`\`\`bash
-$B goto <url>
-$B snapshot -i -a -o "$REPORT_DIR/screenshots/{page}-annotated.png"
-$B responsive "$REPORT_DIR/screenshots/{page}"
-$B console --errors
-$B perf
+# List all public functions/classes/methods
+grep -h "^[A-Za-z].*(" include/**/*.h include/**/*.hpp 2>/dev/null | grep -v "//" | head -50
+
+# Check for Doxygen coverage
+grep -hl "@brief\\|@param\\|@return\\|///" include/**/*.h include/**/*.hpp 2>/dev/null | wc -l
 \`\`\`
 
-### Auth Detection
+Structure findings as an **Inferred API Design System**:
+- **Naming conventions:** snake_case vs camelCase vs PascalCase — consistent?
+- **Ownership model:** raw pointers vs unique_ptr vs shared_ptr — consistent?
+- **Error reporting:** exceptions vs error codes vs std::expected vs callbacks — consistent?
+- **Const correctness:** are read-only operations marked \`const\`?
 
-After the first navigation, check if the URL changed to a login-like path:
-\`\`\`bash
-$B url
-\`\`\`
-If URL contains \`/login\`, \`/signin\`, \`/auth\`, or \`/sso\`: the site requires authentication. AskUserQuestion: "This site requires authentication. Want to import cookies from your browser? Run \`/setup-browser-cookies\` first if needed."
-
-### Design Audit Checklist (10 categories, ~80 items)
-
-Apply these at each page. Each finding gets an impact rating (high/medium/polish) and category.
-
-**1. Visual Hierarchy & Composition** (8 items)
-- Clear focal point? One primary CTA per view?
-- Eye flows naturally top-left to bottom-right?
-- Visual noise — competing elements fighting for attention?
-- Information density appropriate for content type?
-- Z-index clarity — nothing unexpectedly overlapping?
-- Above-the-fold content communicates purpose in 3 seconds?
-- Squint test: hierarchy still visible when blurred?
-- White space is intentional, not leftover?
-
-**2. Typography** (15 items)
-- Font count <=3 (flag if more)
-- Scale follows ratio (1.25 major third or 1.333 perfect fourth)
-- Line-height: 1.5x body, 1.15-1.25x headings
-- Measure: 45-75 chars per line (66 ideal)
-- Heading hierarchy: no skipped levels (h1→h3 without h2)
-- Weight contrast: >=2 weights used for hierarchy
-- No blacklisted fonts (Papyrus, Comic Sans, Lobster, Impact, Jokerman)
-- If primary font is Inter/Roboto/Open Sans/Poppins → flag as potentially generic
-- \`text-wrap: balance\` or \`text-pretty\` on headings (check via \`$B css <heading> text-wrap\`)
-- Curly quotes used, not straight quotes
-- Ellipsis character (\`…\`) not three dots (\`...\`)
-- \`font-variant-numeric: tabular-nums\` on number columns
-- Body text >= 16px
-- Caption/label >= 12px
-- No letterspacing on lowercase text
-
-**3. Color & Contrast** (10 items)
-- Palette coherent (<=12 unique non-gray colors)
-- WCAG AA: body text 4.5:1, large text (18px+) 3:1, UI components 3:1
-- Semantic colors consistent (success=green, error=red, warning=yellow/amber)
-- No color-only encoding (always add labels, icons, or patterns)
-- Dark mode: surfaces use elevation, not just lightness inversion
-- Dark mode: text off-white (~#E0E0E0), not pure white
-- Primary accent desaturated 10-20% in dark mode
-- \`color-scheme: dark\` on html element (if dark mode present)
-- No red/green only combinations (8% of men have red-green deficiency)
-- Neutral palette is warm or cool consistently — not mixed
-
-**4. Spacing & Layout** (12 items)
-- Grid consistent at all breakpoints
-- Spacing uses a scale (4px or 8px base), not arbitrary values
-- Alignment is consistent — nothing floats outside the grid
-- Rhythm: related items closer together, distinct sections further apart
-- Border-radius hierarchy (not uniform bubbly radius on everything)
-- Inner radius = outer radius - gap (nested elements)
-- No horizontal scroll on mobile
-- Max content width set (no full-bleed body text)
-- \`env(safe-area-inset-*)\` for notch devices
-- URL reflects state (filters, tabs, pagination in query params)
-- Flex/grid used for layout (not JS measurement)
-- Breakpoints: mobile (375), tablet (768), desktop (1024), wide (1440)
-
-**5. Interaction States** (10 items)
-- Hover state on all interactive elements
-- \`focus-visible\` ring present (never \`outline: none\` without replacement)
-- Active/pressed state with depth effect or color shift
-- Disabled state: reduced opacity + \`cursor: not-allowed\`
-- Loading: skeleton shapes match real content layout
-- Empty states: warm message + primary action + visual (not just "No items.")
-- Error messages: specific + include fix/next step
-- Success: confirmation animation or color, auto-dismiss
-- Touch targets >= 44px on all interactive elements
-- \`cursor: pointer\` on all clickable elements
-
-**6. Responsive Design** (8 items)
-- Mobile layout makes *design* sense (not just stacked desktop columns)
-- Touch targets sufficient on mobile (>= 44px)
-- No horizontal scroll on any viewport
-- Images handle responsive (srcset, sizes, or CSS containment)
-- Text readable without zooming on mobile (>= 16px body)
-- Navigation collapses appropriately (hamburger, bottom nav, etc.)
-- Forms usable on mobile (correct input types, no autoFocus on mobile)
-- No \`user-scalable=no\` or \`maximum-scale=1\` in viewport meta
-
-**7. Motion & Animation** (6 items)
-- Easing: ease-out for entering, ease-in for exiting, ease-in-out for moving
-- Duration: 50-700ms range (nothing slower unless page transition)
-- Purpose: every animation communicates something (state change, attention, spatial relationship)
-- \`prefers-reduced-motion\` respected (check: \`$B js "matchMedia('(prefers-reduced-motion: reduce)').matches"\`)
-- No \`transition: all\` — properties listed explicitly
-- Only \`transform\` and \`opacity\` animated (not layout properties like width, height, top, left)
-
-**8. Content & Microcopy** (8 items)
-- Empty states designed with warmth (message + action + illustration/icon)
-- Error messages specific: what happened + why + what to do next
-- Button labels specific ("Save API Key" not "Continue" or "Submit")
-- No placeholder/lorem ipsum text visible in production
-- Truncation handled (\`text-overflow: ellipsis\`, \`line-clamp\`, or \`break-words\`)
-- Active voice ("Install the CLI" not "The CLI will be installed")
-- Loading states end with \`…\` ("Saving…" not "Saving...")
-- Destructive actions have confirmation modal or undo window
-
-**9. AI Slop Detection** (10 anti-patterns — the blacklist)
-
-The test: would a human designer at a respected studio ever ship this?
-
-- Purple/violet/indigo gradient backgrounds or blue-to-purple color schemes
-- **The 3-column feature grid:** icon-in-colored-circle + bold title + 2-line description, repeated 3x symmetrically. THE most recognizable AI layout.
-- Icons in colored circles as section decoration (SaaS starter template look)
-- Centered everything (\`text-align: center\` on all headings, descriptions, cards)
-- Uniform bubbly border-radius on every element (same large radius on everything)
-- Decorative blobs, floating circles, wavy SVG dividers (if a section feels empty, it needs better content, not decoration)
-- Emoji as design elements (rockets in headings, emoji as bullet points)
-- Colored left-border on cards (\`border-left: 3px solid <accent>\`)
-- Generic hero copy ("Welcome to [X]", "Unlock the power of...", "Your all-in-one solution for...")
-- Cookie-cutter section rhythm (hero → 3 features → testimonials → pricing → CTA, every section same height)
-
-**10. Performance as Design** (6 items)
-- LCP < 2.0s (web apps), < 1.5s (informational sites)
-- CLS < 0.1 (no visible layout shifts during load)
-- Skeleton quality: shapes match real content, shimmer animation
-- Images: \`loading="lazy"\`, width/height dimensions set, WebP/AVIF format
-- Fonts: \`font-display: swap\`, preconnect to CDN origins
-- No visible font swap flash (FOUT) — critical fonts preloaded
+After extraction, offer: *"Want me to save this as your API.md? I can document these conventions as your project's API design baseline."*
 
 ---
 
-## Phase 4: Interaction Flow Review
+## Phase 3: Module-by-Module API Audit
 
-Walk 2-3 key user flows and evaluate the *feel*, not just the function:
+For each public header/module in scope, read the full file and apply the checklist:
 
-\`\`\`bash
-$B snapshot -i
-$B click @e3           # perform action
-$B snapshot -D          # diff to see what changed
-\`\`\`
+### API Design Audit Checklist (8 categories, ~60 items)
 
-Evaluate:
-- **Response feel:** Does clicking feel responsive? Any delays or missing loading states?
-- **Transition quality:** Are transitions intentional or generic/absent?
-- **Feedback clarity:** Did the action clearly succeed or fail? Is the feedback immediate?
-- **Form polish:** Focus states visible? Validation timing correct? Errors near the source?
+**1. Naming & Clarity** (10 items)
+- Function names are verbs describing what they do (\`compute_checksum\` not \`checksum\`)
+- Types are nouns; predicates end in \`_is\` or similar (\`is_valid\`, \`has_data\`)
+- No abbreviations that require domain knowledge to decode
+- Consistent naming conventions across the entire API surface
+- Parameter names match their purpose — no single-letter names except loop indices
+- Boolean parameters avoided in favor of enum types (no \`void set_mode(bool fast)\`)
+- No implicit units — encode units in name or type (\`timeout_ms\` not \`timeout\`)
+- Output parameters clearly named or avoided in favor of return values
+- Template parameter names descriptive (\`template<typename Container>\` not \`template<typename T>\`)
+- Constructor parameters unambiguous — does parameter order matter? Could callers swap them?
+
+**2. Ownership & Lifetime** (10 items)
+- Raw owning pointers eliminated — use \`unique_ptr\`, \`shared_ptr\`, or value types
+- Non-owning pointers documented as such (or use spans/views)
+- Lifetime requirements documented in Doxygen (\`@note object must outlive this call\`)
+- Object lifetimes clearly specified for complex ownership graphs
+- RAII used for all resources (file handles, sockets, mutexes, memory)
+- Factory functions return smart pointers, not raw pointers
+- Move semantics supported where copy is expensive
+- Rule of 0 preferred — let compilers generate special members when possible
+- Deleted copy/move constructors documented with reason
+- No implicit global state that affects object lifetime
+
+**3. Error Handling** (8 items)
+- Error handling strategy is consistent (exceptions, error codes, or \`std::expected\`)
+- No mixed strategies in the same module without reason
+- Error types are specific — \`FileNotFoundError\` not \`RuntimeError\`
+- No silent failures — every error is reported
+- Error messages are actionable: what happened + what to do
+- Precondition violations: documented and either asserted or return error (not silent UB)
+- Exception safety: at minimum basic guarantee; strong guarantee for mutating operations
+- \`noexcept\` applied to all functions that genuinely cannot throw
+
+**4. Const Correctness** (6 items)
+- All member functions that don't mutate state marked \`const\`
+- Input-only pointer/reference parameters marked \`const\`
+- Return values: return \`const\` refs where appropriate
+- \`constexpr\` used where computation can be done at compile time
+- Mutable state not exposed through const accessors
+- \`const\` propagation through wrapper types
+
+**5. Thread Safety** (8 items)
+- Thread safety guarantees documented for every class (none / read-safe / fully thread-safe)
+- Shared mutable state protected by mutex or atomics
+- Data races impossible by construction where possible
+- Mutex locking order documented to prevent deadlock
+- Thread ownership documented (\`// Must be called from the UI thread\`)
+- Atomic operations use appropriate memory ordering
+- Lock-free data structures use formal correctness argument or proven pattern
+- Condition variable spurious-wakeup handling
+
+**6. Usability & Ergonomics** (10 items)
+- Common case is easy; rare cases are possible
+- Default arguments provided for rarely-changed parameters
+- Builder or fluent API for complex configurations (>4 parameters → use builder)
+- Symmetric operations both present (\`start/stop\`, \`open/close\`, \`push/pop\`)
+- No "magic number" constants — use named enums or constexpr constants
+- Overload sets logical — each overload has a clear use case
+- Implicit conversions avoided or explicitly documented
+- No surprises in operator overloads
+- PIMPL or abstract base for ABI stability in shared library APIs
+- Trivially destructible types where possible
+
+**7. Documentation Completeness** (8 items)
+- Every public function has Doxygen \`@brief\`, \`@param\`, and \`@return\`
+- \`@throws\` documents all possible exceptions
+- \`@pre\` and \`@post\` for preconditions and postconditions
+- \`@note\` for thread safety and lifetime requirements
+- Complex algorithms explained with ASCII diagrams in comments
+- \`@deprecated\` with migration path for old APIs
+- Example usage in Doxygen \`@code\` blocks for non-obvious APIs
+- README describes overall design philosophy, not just per-function docs
+
+**8. Platform & Portability** (8 items)
+- Platform-specific code isolated in clearly-named files or \`#ifdef\` blocks
+- No undefined behavior relied upon
+- Endianness handled explicitly for network/file formats
+- Alignment requirements documented for hardware-mapped structs
+- For embedded: no heap allocation in ISR context; stack size constraints noted
+- For embedded: volatile on memory-mapped registers, appropriate memory barriers
+- Cross-compiler: no GCC/Clang extensions without alternatives for MSVC, or vice versa
+- No unspecified behavior (e.g., \`sizeof(int)\` assumed to be 4)
 
 ---
 
-## Phase 5: Cross-Page Consistency
+## Phase 4: Cross-Module Consistency
 
-Compare screenshots and observations across pages for:
-- Navigation bar consistent across all pages?
-- Footer consistent?
-- Component reuse vs one-off designs (same button styled differently on different pages?)
-- Tone consistency (one page playful while another is corporate?)
-- Spacing rhythm carries across pages?
+Compare header files for:
+- Naming conventions consistent across all modules?
+- Error handling strategy consistent?
+- Same operation spelled the same way in different modules?
+- No copy-pasted code that should be shared?
+- Dependency graph: do lower-level modules accidentally depend on higher-level ones?
+
+---
+
+## Phase 5: Usage Flow Review
+
+Walk 2-3 key usage scenarios from a caller's perspective:
+
+1. Find or write a minimal example of using the primary API
+2. Check: is the happy path obvious without reading implementation?
+3. Check: is it easy to misuse? (parameters in wrong order? forget to call init/shutdown?)
+4. Check: error handling — can a caller robustly handle all failure modes?
+5. Check: cleanup — is it clear when/how to free resources?
 
 ---
 
@@ -804,104 +727,75 @@ Compare screenshots and observations across pages for:
 
 ### Output Locations
 
-**Local:** \`.gstack/design-reports/design-audit-{domain}-{YYYY-MM-DD}.md\`
+**Local:** \`.gstackplusplus/api-design-reports/api-design-audit-{module}-{YYYY-MM-DD}.md\`
 
 **Project-scoped:**
 \`\`\`bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-mkdir -p ~/.gstack/projects/$SLUG
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+mkdir -p ~/.gstackplusplus/projects/$SLUG
 \`\`\`
-Write to: \`~/.gstack/projects/{slug}/{user}-{branch}-design-audit-{datetime}.md\`
+Write to: \`~/.gstackplusplus/projects/{slug}/{user}-{branch}-api-design-audit-{datetime}.md\`
 
-**Baseline:** Write \`design-baseline.json\` for regression mode:
-\`\`\`json
-{
-  "date": "YYYY-MM-DD",
-  "url": "<target>",
-  "designScore": "B",
-  "aiSlopScore": "C",
-  "categoryGrades": { "hierarchy": "A", "typography": "B", ... },
-  "findings": [{ "id": "FINDING-001", "title": "...", "impact": "high", "category": "typography" }]
-}
-\`\`\`
+**Baseline:** Write \`api-design-baseline.json\` for regression mode.
 
 ### Scoring System
 
-**Dual headline scores:**
-- **Design Score: {A-F}** — weighted average of all 10 categories
-- **AI Slop Score: {A-F}** — standalone grade with pithy verdict
+**Headline score: API Design Score {A-F}** — weighted average of all 8 categories.
 
 **Per-category grades:**
-- **A:** Intentional, polished, delightful. Shows design thinking.
-- **B:** Solid fundamentals, minor inconsistencies. Looks professional.
-- **C:** Functional but generic. No major problems, no design point of view.
-- **D:** Noticeable problems. Feels unfinished or careless.
-- **F:** Actively hurting user experience. Needs significant rework.
+- **A:** Intentional, consistent, hard to misuse. Shows API design expertise.
+- **B:** Solid fundamentals, minor inconsistencies. Usable without surprises.
+- **C:** Functional but needs documentation. Callers need to read source.
+- **D:** Noticeable problems. Misuse likely.
+- **F:** Actively harmful API. Common misuse leads to crashes or data corruption.
 
-**Grade computation:** Each category starts at A. Each High-impact finding drops one letter grade. Each Medium-impact finding drops half a letter grade. Polish findings are noted but do not affect grade. Minimum is F.
-
-**Category weights for Design Score:**
+**Category weights:**
 | Category | Weight |
 |----------|--------|
-| Visual Hierarchy | 15% |
-| Typography | 15% |
-| Spacing & Layout | 15% |
-| Color & Contrast | 10% |
-| Interaction States | 10% |
-| Responsive | 10% |
-| Content Quality | 10% |
-| AI Slop | 5% |
-| Motion | 5% |
-| Performance Feel | 5% |
-
-AI Slop is 5% of Design Score but also graded independently as a headline metric.
-
-### Regression Output
-
-When previous \`design-baseline.json\` exists or \`--regression\` flag is used:
-- Load baseline grades
-- Compare: per-category deltas, new findings, resolved findings
-- Append regression table to report
+| Naming & Clarity | 15% |
+| Ownership & Lifetime | 20% |
+| Error Handling | 15% |
+| Const Correctness | 10% |
+| Thread Safety | 10% |
+| Usability & Ergonomics | 15% |
+| Documentation | 10% |
+| Platform & Portability | 5% |
 
 ---
 
-## Design Critique Format
+## API Design Critique Format
 
 Use structured feedback, not opinions:
-- "I notice..." — observation (e.g., "I notice the primary CTA competes with the secondary action")
-- "I wonder..." — question (e.g., "I wonder if users will understand what 'Process' means here")
-- "What if..." — suggestion (e.g., "What if we moved search to a more prominent position?")
-- "I think... because..." — reasoned opinion (e.g., "I think the spacing between sections is too uniform because it doesn't create hierarchy")
+- "I notice..." — observation (e.g., "I notice both \`connect()\` and \`init()\` must be called in sequence — caller can't know this from the API alone")
+- "I wonder..." — question (e.g., "I wonder if callers will accidentally pass width and height in the wrong order")
+- "What if..." — suggestion (e.g., "What if we use a \`Size\` struct instead of two separate parameters?")
+- "I think... because..." — reasoned opinion
 
-Tie everything to user goals and product objectives. Always suggest specific improvements alongside problems.
+Tie everything to the caller's perspective. Always suggest specific improvements alongside problems.
 
 ---
 
 ## Important Rules
 
-1. **Think like a designer, not a QA engineer.** You care whether things feel right, look intentional, and respect the user. You do NOT just care whether things "work."
-2. **Screenshots are evidence.** Every finding needs at least one screenshot. Use annotated screenshots (\`snapshot -a\`) to highlight elements.
-3. **Be specific and actionable.** "Change X to Y because Z" — not "the spacing feels off."
-4. **Never read source code.** Evaluate the rendered site, not the implementation. (Exception: offer to write DESIGN.md from extracted observations.)
-5. **AI Slop detection is your superpower.** Most developers can't evaluate whether their site looks AI-generated. You can. Be direct about it.
-6. **Quick wins matter.** Always include a "Quick Wins" section — the 3-5 highest-impact fixes that take <30 minutes each.
-7. **Use \`snapshot -C\` for tricky UIs.** Finds clickable divs that the accessibility tree misses.
-8. **Responsive is design, not just "not broken."** A stacked desktop layout on mobile is not responsive design — it's lazy. Evaluate whether the mobile layout makes *design* sense.
-9. **Document incrementally.** Write each finding to the report as you find it. Don't batch.
-10. **Depth over breadth.** 5-10 well-documented findings with screenshots and specific suggestions > 20 vague observations.
-11. **Show screenshots to the user.** After every \`$B screenshot\`, \`$B snapshot -a -o\`, or \`$B responsive\` command, use the Read tool on the output file(s) so the user can see them inline. For \`responsive\` (3 files), Read all three. This is critical — without it, screenshots are invisible to the user.`;
+1. **Think like a caller, not the implementer.** You care whether the API is hard to misuse and easy to understand.
+2. **Code is evidence.** Every finding cites the specific file/line/function.
+3. **Be specific and actionable.** "Change \`void* buf, int len\` to \`std::span<std::byte>\` because it prevents buffer overreads" — not "the parameters look unsafe."
+4. **Read headers, not implementations.** Evaluate the public contract, not the internals.
+5. **Ownership ambiguity is your superpower.** Most C++ bugs come from unclear ownership.
+6. **Quick wins matter.** Always include a "Quick Wins" section — the 3-5 highest-impact fixes.
+7. **Document incrementally.** Write each finding to the report as you find it. Don't batch.
+8. **Depth over breadth.** 5-10 well-documented findings > 20 vague observations.`;
 }
-
 function generateReviewDashboard(): string {
   return `## Review Readiness Dashboard
 
 After completing the review, read the review log and config to display the dashboard.
 
 \`\`\`bash
-eval $(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)
-cat ~/.gstack/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_REVIEWS"
+eval $(~/.claude/skills/gstackplusplus/bin/gstackplusplus-slug 2>/dev/null)
+cat ~/.gstackplusplus/projects/$SLUG/$BRANCH-reviews.jsonl 2>/dev/null || echo "NO_REVIEWS"
 echo "---CONFIG---"
-~/.claude/skills/gstack/bin/gstack-config get skip_eng_review 2>/dev/null || echo "false"
+~/.claude/skills/gstackplusplus/bin/gstackplusplus-config get skip_eng_review 2>/dev/null || echo "false"
 \`\`\`
 
 Parse the output. Find the most recent entry for each skill (plan-ceo-review, plan-eng-review, plan-design-review, design-review-lite). Ignore entries with timestamps older than 7 days. For Design Review, show whichever is more recent between \`plan-design-review\` (full visual audit) and \`design-review-lite\` (code-level check). Append "(FULL)" or "(LITE)" to the status to distinguish. Display:
@@ -921,7 +815,7 @@ Parse the output. Find the most recent entry for each skill (plan-ceo-review, pl
 \`\`\`
 
 **Review tiers:**
-- **Eng Review (required by default):** The only review that gates shipping. Covers architecture, code quality, tests, performance. Can be disabled globally with \\\`gstack-config set skip_eng_review true\\\` (the "don't bother me" setting).
+- **Eng Review (required by default):** The only review that gates shipping. Covers architecture, code quality, tests, performance. Can be disabled globally with \\\`gstackplusplus-config set skip_eng_review true\\\` (the "don't bother me" setting).
 - **CEO Review (optional):** Use your judgment. Recommend it for big product/business changes, new user-facing features, or scope decisions. Skip for bug fixes, refactors, infra, and cleanup.
 - **Design Review (optional):** Use your judgment. Recommend it for UI/UX changes. Skip for backend-only, infra, or prompt-only changes.
 
@@ -935,156 +829,198 @@ Parse the output. Find the most recent entry for each skill (plan-ceo-review, pl
 function generateTestBootstrap(): string {
   return `## Test Framework Bootstrap
 
-**Detect existing test framework and project runtime:**
+**Detect existing test framework and C++ project setup:**
 
 \`\`\`bash
-# Detect project runtime
-[ -f Gemfile ] && echo "RUNTIME:ruby"
-[ -f package.json ] && echo "RUNTIME:node"
-[ -f requirements.txt ] || [ -f pyproject.toml ] && echo "RUNTIME:python"
-[ -f go.mod ] && echo "RUNTIME:go"
-[ -f Cargo.toml ] && echo "RUNTIME:rust"
-[ -f composer.json ] && echo "RUNTIME:php"
-[ -f mix.exs ] && echo "RUNTIME:elixir"
-# Detect sub-frameworks
-[ -f Gemfile ] && grep -q "rails" Gemfile 2>/dev/null && echo "FRAMEWORK:rails"
-[ -f package.json ] && grep -q '"next"' package.json 2>/dev/null && echo "FRAMEWORK:nextjs"
-# Check for existing test infrastructure
-ls jest.config.* vitest.config.* playwright.config.* .rspec pytest.ini pyproject.toml phpunit.xml 2>/dev/null
-ls -d test/ tests/ spec/ __tests__/ cypress/ e2e/ 2>/dev/null
+# Detect build system
+[ -f CMakeLists.txt ] && echo "BUILD:cmake" || true
+[ -f Makefile ] && echo "BUILD:make" || true
+[ -f meson.build ] && echo "BUILD:meson" || true
+# Detect test framework
+grep -r "gtest\|googletest\|GTest" CMakeLists.txt 2>/dev/null && echo "TEST_FW:gtest" || true
+grep -r "Catch2\|CATCH_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:catch2" || true
+grep -r "doctest\|DOCTEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:doctest" || true
+grep -r "boost.*test\|BOOST_TEST" CMakeLists.txt 2>/dev/null && echo "TEST_FW:boost_test" || true
+# Check for test directories
+ls -d test/ tests/ spec/ 2>/dev/null
+# Check for CTest integration
+grep -r "enable_testing\|add_test\|ctest" CMakeLists.txt 2>/dev/null | head -3
 # Check opt-out marker
-[ -f .gstack/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
+[ -f .gstackplusplus/no-test-bootstrap ] && echo "BOOTSTRAP_DECLINED"
 \`\`\`
 
-**If test framework detected** (config files or test directories found):
-Print "Test framework detected: {name} ({N} existing tests). Skipping bootstrap."
-Read 2-3 existing test files to learn conventions (naming, imports, assertion style, setup patterns).
+**If test framework detected** (gtest/catch2/doctest/boost_test found in CMakeLists.txt):
+Print "Test framework detected: {name}. Skipping bootstrap."
+Read 2-3 existing test files to learn conventions (naming, assertion style, fixture patterns).
 Store conventions as prose context for use in Phase 8e.5 or Step 3.4. **Skip the rest of bootstrap.**
 
 **If BOOTSTRAP_DECLINED** appears: Print "Test bootstrap previously declined — skipping." **Skip the rest of bootstrap.**
 
-**If NO runtime detected** (no config files found): Use AskUserQuestion:
-"I couldn't detect your project's language. What runtime are you using?"
-Options: A) Node.js/TypeScript B) Ruby/Rails C) Python D) Go E) Rust F) PHP G) Elixir H) This project doesn't need tests.
-If user picks H → write \`.gstack/no-test-bootstrap\` and continue without tests.
+**If no test framework detected:** Use AskUserQuestion:
+"I couldn't detect a C++ test framework. Which one do you want to use?"
+Options: A) GoogleTest (gtest) — industry standard, widely supported B) Catch2 v3 — header-friendly, BDD-style C) doctest — ultra-lightweight, single-header D) This project doesn't need automated tests.
+If user picks D → write \`.gstackplusplus/no-test-bootstrap\` and continue without tests.
 
-**If runtime detected but no test framework — bootstrap:**
+**If framework chosen — bootstrap:**
 
-### B2. Research best practices
+### B2. Add test framework to CMake
 
-Use WebSearch to find current best practices for the detected runtime:
-- \`"[runtime] best test framework 2025 2026"\`
-- \`"[framework A] vs [framework B] comparison"\`
+**GoogleTest:**
+\`\`\`cmake
+# Add to CMakeLists.txt
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+\`\`\`
 
-If WebSearch is unavailable, use this built-in knowledge table:
+**Catch2:**
+\`\`\`cmake
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.5.0
+)
+FetchContent_MakeAvailable(Catch2)
+enable_testing()
+include(Catch)
+\`\`\`
 
-| Runtime | Primary recommendation | Alternative |
-|---------|----------------------|-------------|
-| Ruby/Rails | minitest + fixtures + capybara | rspec + factory_bot + shoulda-matchers |
-| Node.js | vitest + @testing-library | jest + @testing-library |
-| Next.js | vitest + @testing-library/react + playwright | jest + cypress |
-| Python | pytest + pytest-cov | unittest |
-| Go | stdlib testing + testify | stdlib only |
-| Rust | cargo test (built-in) + mockall | — |
-| PHP | phpunit + mockery | pest |
-| Elixir | ExUnit (built-in) + ex_machina | — |
+### B3. Create test directory structure
 
-### B3. Framework selection
+\`\`\`bash
+mkdir -p test/unit test/integration
+\`\`\`
 
-Use AskUserQuestion:
-"I detected this is a [Runtime/Framework] project with no test framework. I researched current best practices. Here are the options:
-A) [Primary] — [rationale]. Includes: [packages]. Supports: unit, integration, smoke, e2e
-B) [Alternative] — [rationale]. Includes: [packages]
-C) Skip — don't set up testing right now
-RECOMMENDATION: Choose A because [reason based on project context]"
+Add test CMakeLists.txt:
+\`\`\`cmake
+# test/CMakeLists.txt
+add_subdirectory(unit)
+add_subdirectory(integration)
+\`\`\`
 
-If user picks C → write \`.gstack/no-test-bootstrap\`. Tell user: "If you change your mind later, delete \`.gstack/no-test-bootstrap\` and re-run." Continue without tests.
+### B4. Write first real tests
 
-If multiple runtimes detected (monorepo) → ask which runtime to set up first, with option to do both sequentially.
+Find recently changed source files:
+\`\`\`bash
+git log --since=30.days --name-only --format="" | grep "\\.(cpp|cxx|cc)$" | sort | uniq -c | sort -rn | head -10
+\`\`\`
 
-### B4. Install and configure
+Prioritize by risk: error handlers > business logic with conditionals > utility functions.
 
-1. Install the chosen packages (npm/bun/gem/pip/etc.)
-2. Create minimal config file
-3. Create directory structure (test/, spec/, etc.)
-4. Create one example test matching the project's code to verify setup works
+For each file, write one test exercising real behavior with meaningful assertions.
+Never write tests that just check "it compiles" — test what the code DOES.
 
-If package installation fails → debug once. If still failing → revert with \`git checkout -- package.json package-lock.json\` (or equivalent for the runtime). Warn user and continue without tests.
+**GTest example:**
+\`\`\`cpp
+#include <gtest/gtest.h>
+#include "your_header.hpp"
 
-### B4.5. First real tests
-
-Generate 3-5 real tests for existing code:
-
-1. **Find recently changed files:** \`git log --since=30.days --name-only --format="" | sort | uniq -c | sort -rn | head -10\`
-2. **Prioritize by risk:** Error handlers > business logic with conditionals > API endpoints > pure functions
-3. **For each file:** Write one test that tests real behavior with meaningful assertions. Never \`expect(x).toBeDefined()\` — test what the code DOES.
-4. Run each test. Passes → keep. Fails → fix once. Still fails → delete silently.
-5. Generate at least 1 test, cap at 5.
-
-Never import secrets, API keys, or credentials in test files. Use environment variables or test fixtures.
+TEST(ModuleNameTest, DescribesBehavior) {
+  // Arrange
+  MyClass obj;
+  // Act
+  auto result = obj.doSomething(42);
+  // Assert
+  EXPECT_EQ(result, expected_value);
+}
+\`\`\`
 
 ### B5. Verify
 
 \`\`\`bash
-# Run the full test suite to confirm everything works
-{detected test command}
+cmake --build $BUILD_DIR --target all
+ctest --test-dir $BUILD_DIR --output-on-failure
 \`\`\`
 
-If tests fail → debug once. If still failing → revert all bootstrap changes and warn user.
+If tests fail → debug once. If still failing → revert bootstrap changes and warn user.
 
-### B5.5. CI/CD pipeline
+### B6. CI/CD pipeline
 
 \`\`\`bash
-# Check CI provider
-ls -d .github/ 2>/dev/null && echo "CI:github"
-ls .gitlab-ci.yml .circleci/ bitrise.yml 2>/dev/null
+ls -d .github/ 2>/dev/null && echo "CI:github" || true
+ls .gitlab-ci.yml .circleci/ 2>/dev/null
 \`\`\`
 
-If \`.github/\` exists (or no CI detected — default to GitHub Actions):
-Create \`.github/workflows/test.yml\` with:
-- \`runs-on: ubuntu-latest\`
-- Appropriate setup action for the runtime (setup-node, setup-ruby, setup-python, etc.)
-- The same test command verified in B5
-- Trigger: push + pull_request
+If \`.github/\` exists or no CI detected — create \`.github/workflows/ci.yml\`:
+\`\`\`yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++ clang clang-tidy
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+\`\`\`
 
-If non-GitHub CI detected → skip CI generation with note: "Detected {provider} — CI pipeline generation supports GitHub Actions only. Add test step to your existing pipeline manually."
-
-### B6. Create TESTING.md
-
-First check: If TESTING.md already exists → read it and update/append rather than overwriting. Never destroy existing content.
+### B7. Create TESTING.md
 
 Write TESTING.md with:
-- Philosophy: "100% test coverage is the key to great vibe coding. Tests let you move fast, trust your instincts, and ship with confidence — without them, vibe coding is just yolo coding. With tests, it's a superpower."
 - Framework name and version
-- How to run tests (the verified command from B5)
-- Test layers: Unit tests (what, where, when), Integration tests, Smoke tests, E2E tests
-- Conventions: file naming, assertion style, setup/teardown patterns
+- How to configure: \`cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug\`
+- How to build: \`cmake --build build --parallel\`
+- How to run tests: \`ctest --test-dir build --output-on-failure\`
+- How to run with sanitizers: \`cmake -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined"\`
+- How to run static analysis: \`clang-tidy -p build src/*.cpp\`
+- Conventions: file naming, test fixture patterns, mock patterns
 
-### B7. Update CLAUDE.md
+### B8. Update CLAUDE.md
 
-First check: If CLAUDE.md already has a \`## Testing\` section → skip. Don't duplicate.
-
-Append a \`## Testing\` section:
-- Run command and test directory
-- Reference to TESTING.md
+Append a \`## Testing\` section if not present:
+- CMake configure and build commands
+- CTest command to run all tests
 - Test expectations:
-  - 100% test coverage is the goal — tests make vibe coding safe
+  - 100% test coverage is the goal — tests make AI-assisted coding safe
   - When writing new functions, write a corresponding test
   - When fixing a bug, write a regression test
   - When adding error handling, write a test that triggers the error
   - When adding a conditional (if/else, switch), write tests for BOTH paths
   - Never commit code that makes existing tests fail
 
-### B8. Commit
+### B9. Commit
 
 \`\`\`bash
 git status --porcelain
 \`\`\`
 
-Only commit if there are changes. Stage all bootstrap files (config, test directory, TESTING.md, CLAUDE.md, .github/workflows/test.yml if created):
+Only commit if there are changes. Stage all bootstrap files:
 \`git commit -m "chore: bootstrap test framework ({framework name})"\`
 
 ---`;
+}
+
+function generateDesignPrinciples(): string {
+  return `## Design Principles: KISS · DRY · SOLID · YAGNI
+
+Apply these four principles throughout all analysis, recommendations, and fixes.
+They are listed in priority order — when they conflict, prefer the earlier one.
+
+| Principle | Priority | What it means in C++ | Watch for |
+|-----------|----------|----------------------|-----------|
+| **YAGNI** — You Ain't Gonna Need It | 1 (highest) | Build for today's requirements. No template parameters for hypothetical future types, no virtual methods before you have two concrete implementations, no generalization beyond the current use case. | Template type params with one instantiation, virtual methods with one override, \`// will be useful when…\` comments, policy classes with no alternate policy |
+| **KISS** — Keep It Simple | 2 | Prefer the simplest solution that works. No clever metaprogramming when a plain function suffices. Write for the engineer debugging at 3 am. | Multi-level template specialisations for a single case, SFINAE chains that could be \`if constexpr\`, \`auto\`-everything obscuring types, "clever" one-liners that need a comment to explain themselves |
+| **DRY** — Don't Repeat Yourself | 3 | Every piece of knowledge has one authoritative home. Factor repeated logic into shared helpers, base classes, or macros of last resort. | Same algorithm in two files, copy-pasted error-handling blocks, duplicated constants, parallel \`switch\` statements that must always change together |
+| **SOLID** | 4 | **S**ingle Responsibility · **O**pen/Closed · **L**iskov Substitution · **I**nterface Segregation · **D**ependency Inversion. Each class does one thing; extend by addition not modification; subtypes are drop-in replacements; interfaces are minimal; dependencies are injected not hard-coded. | God classes/files, \`if (type == X)\` dispatch that should be virtual, non-substitutable subclasses that override preconditions, fat interfaces with unrelated methods, singletons and global state that make testing impossible |
+
+### Principle interactions in practice
+
+- Favour **YAGNI over SOLID**: don't introduce an interface abstraction until you have two concrete implementations. One implementation = no interface needed yet.
+- Favour **KISS over DRY**: a small, clear duplication is better than a clever abstraction that obscures intent. Abstract when the duplication hurts, not as soon as you see two similar lines.
+- **DRY is not about lines of code** — it is about knowledge. Two functions that happen to look similar but represent independent business rules should stay separate.
+- **SOLID's D (Dependency Inversion) enables testing**: if a component is hard to test in isolation, the fix is usually to inject the dependency rather than to mock globals.`;
 }
 
 const RESOLVERS: Record<string, () => string> = {
@@ -1098,6 +1034,7 @@ const RESOLVERS: Record<string, () => string> = {
   DESIGN_REVIEW_LITE: generateDesignReviewLite,
   REVIEW_DASHBOARD: generateReviewDashboard,
   TEST_BOOTSTRAP: generateTestBootstrap,
+  DESIGN_PRINCIPLES: generateDesignPrinciples,
 };
 
 // ─── Template Processing ────────────────────────────────────
@@ -1150,11 +1087,17 @@ function findTemplates(): string[] {
     path.join(ROOT, 'plan-ceo-review', 'SKILL.md.tmpl'),
     path.join(ROOT, 'plan-eng-review', 'SKILL.md.tmpl'),
     path.join(ROOT, 'retro', 'SKILL.md.tmpl'),
-    path.join(ROOT, 'gstack-upgrade', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'gstackplusplus-upgrade', 'SKILL.md.tmpl'),
     path.join(ROOT, 'plan-design-review', 'SKILL.md.tmpl'),
     path.join(ROOT, 'design-review', 'SKILL.md.tmpl'),
     path.join(ROOT, 'design-consultation', 'SKILL.md.tmpl'),
     path.join(ROOT, 'document-release', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'codex', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'qwen', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'claude', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'antigravity', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'cursor', 'SKILL.md.tmpl'),
+    path.join(ROOT, 'copilot', 'SKILL.md.tmpl'),
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) templates.push(p);

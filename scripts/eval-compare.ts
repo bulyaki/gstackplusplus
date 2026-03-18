@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Compare two eval runs from ~/.gstack-dev/evals/
+ * Compare two eval runs from ~/.gstackplusplus-dev/evals/
  *
  * Usage:
  *   bun run eval:compare                    # compare two most recent of same tier
@@ -18,7 +18,7 @@ import {
 } from '../test/helpers/eval-store';
 import type { EvalResult } from '../test/helpers/eval-store';
 
-const EVAL_DIR = path.join(os.homedir(), '.gstack-dev', 'evals');
+const EVAL_DIR = path.join(os.homedir(), '.gstackplusplus-dev', 'evals');
 
 function loadResult(filepath: string): EvalResult {
   // Resolve relative to EVAL_DIR if not absolute

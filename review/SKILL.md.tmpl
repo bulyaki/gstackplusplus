@@ -2,8 +2,8 @@
 name: review
 version: 1.0.0
 description: |
-  Pre-landing PR review. Analyzes diff against the base branch for SQL safety, LLM trust
-  boundary violations, conditional side effects, and other structural issues.
+  Pre-landing PR review. Analyzes diff against the base branch for memory safety, undefined
+  behavior, thread safety violations, RAII compliance, and other C++ structural issues.
 allowed-tools:
   - Bash
   - Read
@@ -20,7 +20,9 @@ allowed-tools:
 
 # Pre-Landing PR Review
 
-You are running the `/review` workflow. Analyze the current branch's diff against the base branch for structural issues that tests don't catch.
+You are running the `/review` workflow. Analyze the current branch's diff against the base branch for C++ structural issues that tests don't catch: memory safety, undefined behavior, thread safety, and API design problems.
+
+{{DESIGN_PRINCIPLES}}
 
 ---
 
@@ -66,20 +68,47 @@ Run `git diff origin/<base>` to get the full diff. This includes both committed 
 
 Apply the checklist against the diff in two passes:
 
-1. **Pass 1 (CRITICAL):** SQL & Data Safety, Race Conditions & Concurrency, LLM Output Trust Boundary, Enum & Value Completeness
-2. **Pass 2 (INFORMATIONAL):** Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, View/Frontend
+1. **Pass 1 (CRITICAL):** Memory Safety & Ownership, Undefined Behavior, Thread Safety & Data Races, Resource Management (RAII)
+2. **Pass 2 (INFORMATIONAL):** API Design & Const Correctness, Magic Numbers & Coupling, Dead Code & Consistency, Test Gaps, Documentation Staleness, Embedded/Platform Concerns
 
-**Enum & Value Completeness requires reading code OUTSIDE the diff.** When the diff introduces a new enum value, status, tier, or type constant, use Grep to find all files that reference sibling values, then Read those files to check if the new value is handled. This is the one category where within-diff review is insufficient.
+**Enum & Switch Completeness requires reading code OUTSIDE the diff.** When the diff introduces a new enum value or variant, use Grep to find all switch statements and if-chains that reference sibling values, then Read those files to check if the new value is handled. This is the one category where within-diff review is insufficient.
+
+**Memory Safety flags to check (Pass 1):**
+- Raw owning pointers in new code (use `unique_ptr`/`shared_ptr` instead)
+- `delete` / `delete[]` outside of RAII destructors
+- Buffer access with no bounds check (pointer arithmetic, `operator[]` on raw arrays)
+- Use of `reinterpret_cast` without clear alignment/aliasing justification
+- `memcpy`/`memset` on non-trivially-copyable types
+- Storing a raw pointer to a temporary or stack object
+- `std::move` on a const object (silently copies instead)
+
+**Undefined Behavior flags to check (Pass 1):**
+- Signed integer overflow used intentionally (undefined in C++, use unsigned or `__builtin_add_overflow`)
+- Left-shifting into the sign bit
+- Dereferencing a pointer to a deleted object or past its lifetime
+- Accessing union member other than the last-written one (outside `std::variant`)
+- Returning a reference/pointer to a local variable
+- Calling virtual functions in constructor/destructor (object not yet fully constructed)
+- `std::string::operator[]` without bounds check where index could be out of range
+
+**Thread Safety flags to check (Pass 1):**
+- Shared mutable data accessed from multiple threads without synchronization
+- `std::shared_ptr` copy without lock (reference count is atomic, pointed-to object is NOT)
+- `static` local variables initialized from multiple threads (safe in C++11+ but document it)
+- Lock-free code without memory ordering justification
+- Condition variable without loop (spurious wakeup)
+- Mutex locked in constructor, unlocked in destructor of different type (RAII inconsistency)
+- `std::async` return value discarded (destructor blocks — caller must store the future)
 
 Follow the output format specified in the checklist. Respect the suppressions — do NOT flag items listed in the "DO NOT flag" section.
 
 ---
 
-## Step 4.5: Design Review (conditional)
+## Step 4.5: API Design Review (conditional)
 
 {{DESIGN_REVIEW_LITE}}
 
-Include any design findings alongside the findings from Step 4. They follow the same Fix-First flow in Step 5 — AUTO-FIX for mechanical CSS fixes, ASK for everything else.
+Include any API design findings alongside the findings from Step 4. They follow the same Fix-First flow in Step 5 — AUTO-FIX for mechanical fixes (missing `const`, undocumented precondition), ASK for everything else.
 
 ---
 
@@ -112,15 +141,18 @@ Example format:
 ```
 I auto-fixed 5 issues. 2 need your input:
 
-1. [CRITICAL] app/models/post.rb:42 — Race condition in status transition
-   Fix: Add `WHERE status = 'draft'` to the UPDATE
+1. [CRITICAL] src/network/connection.cpp:42 — Use-after-free: raw pointer to Connection
+   stored in callback after Connection may be destroyed
+   Fix: Capture a shared_ptr<Connection> or use a weak_ptr to detect lifetime expiry
    → A) Fix  B) Skip
 
-2. [INFORMATIONAL] app/services/generator.rb:88 — LLM output not type-checked before DB write
-   Fix: Add JSON schema validation
+2. [INFORMATIONAL] include/parser/lexer.hpp:88 — Function `tokenize()` takes `char*` buffer
+   with no length — buffer overread if caller passes unterminated string
+   Fix: Change to `std::span<const char>` or `std::string_view`
    → A) Fix  B) Skip
 
-RECOMMENDATION: Fix both — #1 is a real race condition, #2 prevents silent data corruption.
+RECOMMENDATION: Fix both — #1 is a real use-after-free (crash in production), #2 prevents
+silent buffer overreads that are hard to detect in tests.
 ```
 
 If 3 or fewer ASK items, you may use individual AskUserQuestion calls instead of batching.

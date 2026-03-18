@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# gstack-update-check — periodic version check for all skills.
+# gstackplusplus-update-check — periodic version check for all skills.
 #
 # Output (one line, or nothing):
 #   JUST_UPGRADED <old> <new>       — marker found from recent upgrade
@@ -7,26 +7,26 @@
 #   (nothing)                       — up to date, snoozed, disabled, or check skipped
 #
 # Env overrides (for testing):
-#   GSTACK_DIR          — override auto-detected gstack root
-#   GSTACK_REMOTE_URL   — override remote VERSION URL
-#   GSTACK_STATE_DIR    — override ~/.gstack state directory
+#   GSTACKPLUSPLUS_DIR          — override auto-detected gstack++ root
+#   GSTACKPLUSPLUS_REMOTE_URL   — override remote VERSION URL
+#   GSTACKPLUSPLUS_STATE_DIR    — override ~/.gstackplusplus state directory
 set -euo pipefail
 
-GSTACK_DIR="${GSTACK_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
-STATE_DIR="${GSTACK_STATE_DIR:-$HOME/.gstack}"
+GSTACKPLUSPLUS_DIR="${GSTACKPLUSPLUS_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+STATE_DIR="${GSTACKPLUSPLUS_STATE_DIR:-$HOME/.gstackplusplus}"
 CACHE_FILE="$STATE_DIR/last-update-check"
 MARKER_FILE="$STATE_DIR/just-upgraded-from"
 SNOOZE_FILE="$STATE_DIR/update-snoozed"
-VERSION_FILE="$GSTACK_DIR/VERSION"
-REMOTE_URL="${GSTACK_REMOTE_URL:-https://raw.githubusercontent.com/garrytan/gstack/main/VERSION}"
+VERSION_FILE="$GSTACKPLUSPLUS_DIR/VERSION"
+REMOTE_URL="${GSTACKPLUSPLUS_REMOTE_URL:-https://raw.githubusercontent.com/bulyaki/gstackplusplus/main/VERSION}"
 
-# ─── Force flag (busts cache for standalone /gstack-upgrade) ──
+# ─── Force flag (busts cache for standalone /gstackplusplus-upgrade) ──
 if [ "${1:-}" = "--force" ]; then
   rm -f "$CACHE_FILE"
 fi
 
 # ─── Step 0: Check if updates are disabled ────────────────────
-_UC=$("$GSTACK_DIR/bin/gstack-config" get update_check 2>/dev/null || true)
+_UC=$("$GSTACKPLUSPLUS_DIR/bin/gstackplusplus-config" get update_check 2>/dev/null || true)
 if [ "$_UC" = "false" ]; then
   exit 0
 fi
