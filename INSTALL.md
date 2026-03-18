@@ -79,19 +79,19 @@ Writes `CLAUDE.md`. Enables extended thinking, full AskUserQuestion flows, and a
 ```
 /codex
 ```
-Writes `CLAUDE.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
+Writes `CODEX.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
 
 **[Qwen](https://qwen.readthedocs.io/)** (Qwen2.5-Coder, QwQ, Qwen3) — requires Qwen API access or a local Ollama / vLLM instance.
 ```
 /qwen
 ```
-Writes `CLAUDE.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
+Writes `QWEN.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
 
 **[Antigravity](https://antigravity.dev)** — requires an Antigravity workspace.
 ```
 /antigravity
 ```
-Writes `CLAUDE.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
+Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
 
 **[Cursor](https://cursor.sh)** — requires Cursor editor installed.
 ```
@@ -187,19 +187,19 @@ Writes `CLAUDE.md`. Enables extended thinking, full AskUserQuestion flows, and a
 ```
 /codex
 ```
-Writes `CLAUDE.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
+Writes `CODEX.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
 
 **[Qwen](https://qwen.readthedocs.io/)** (Qwen2.5-Coder, QwQ, Qwen3) — requires Qwen API access or a local Ollama / vLLM instance.
 ```
 /qwen
 ```
-Writes `CLAUDE.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
+Writes `QWEN.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
 
 **[Antigravity](https://antigravity.dev)** — requires an Antigravity workspace.
 ```
 /antigravity
 ```
-Writes `CLAUDE.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
+Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
 
 **[Cursor](https://cursor.sh)** — requires Cursor editor installed.
 ```
@@ -285,19 +285,19 @@ Writes `CLAUDE.md`. Enables extended thinking, full AskUserQuestion flows, and a
 ```
 /codex
 ```
-Writes `CLAUDE.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
+Writes `CODEX.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
 
 **[Qwen](https://qwen.readthedocs.io/)** (Qwen2.5-Coder, QwQ, Qwen3) — requires Qwen API access or a local Ollama / vLLM instance.
 ```
 /qwen
 ```
-Writes `CLAUDE.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
+Writes `QWEN.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
 
 **[Antigravity](https://antigravity.dev)** — requires an Antigravity workspace.
 ```
 /antigravity
 ```
-Writes `CLAUDE.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
+Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
 
 **[Cursor](https://cursor.sh)** — requires Cursor editor installed.
 ```
@@ -376,19 +376,19 @@ Writes `CLAUDE.md`. Enables extended thinking, full AskUserQuestion flows, and a
 ```
 /codex
 ```
-Writes `CLAUDE.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
+Writes `CODEX.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
 
 **[Qwen](https://qwen.readthedocs.io/)** (Qwen2.5-Coder, QwQ, Qwen3) — requires Qwen API access or a local Ollama / vLLM instance.
 ```
 /qwen
 ```
-Writes `CLAUDE.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
+Writes `QWEN.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
 
 **[Antigravity](https://antigravity.dev)** — requires an Antigravity workspace.
 ```
 /antigravity
 ```
-Writes `CLAUDE.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
+Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
 
 **[Cursor](https://cursor.sh)** — requires Cursor editor installed.
 ```
@@ -496,19 +496,19 @@ Writes `CLAUDE.md`. Enables extended thinking, full AskUserQuestion flows, and a
 ```
 /codex
 ```
-Writes `CLAUDE.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
+Writes `CODEX.md`. Disables interactive prompts, enables decision logging to `.gstackplusplus/codex-decisions-{date}.md`, and sets hard caps so the agent never runs unsupervised. All decisions are auditable after the fact.
 
 **[Qwen](https://qwen.readthedocs.io/)** (Qwen2.5-Coder, QwQ, Qwen3) — requires Qwen API access or a local Ollama / vLLM instance.
 ```
 /qwen
 ```
-Writes `CLAUDE.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
+Writes `QWEN.md`. Adapts prompts and output structure for Qwen's context window and tokenizer behaviour. Works with both cloud and self-hosted deployments.
 
 **[Antigravity](https://antigravity.dev)** — requires an Antigravity workspace.
 ```
 /antigravity
 ```
-Writes `CLAUDE.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
+Writes `ANTIGRAVITY.md`. Enforces diff-first output (no bystander reformatting), emits `[PHASE:start]`/`[PHASE:done]` streaming markers for the live review UI, formats findings as `[ISSUE:N] SEVERITY — description`, and re-detects the toolchain on every run since Antigravity workspaces are ephemeral.
 
 **[Cursor](https://cursor.sh)** — requires Cursor editor installed.
 ```

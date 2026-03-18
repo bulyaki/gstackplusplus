@@ -60,9 +60,9 @@ open(cfg, 'w').write(text + 'model_mode: antigravity\n')
 echo "gstack++ model_mode set to: antigravity"
 ```
 
-## Step 3: Write CLAUDE.md snippet
+## Step 3: Write ANTIGRAVITY.md snippet
 
-Write this to the project's `CLAUDE.md` under a `## gstack++ (Antigravity)` section:
+Write this to the project's `ANTIGRAVITY.md` under a `## gstack++ (Antigravity)` section (create the file if it does not exist — Antigravity reads `ANTIGRAVITY.md` for project-level instructions):
 
 ```markdown
 ## gstack++ (Antigravity mode)
